@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Zalo
+Comment=Unofficial port of Zalo messaging application for Linux systems (Flatpak).
+Icon=com.zalo.linux
+Exec=zalo %U
+Terminal=false
+Categories=Network;
+StartupWMClass=Zalo

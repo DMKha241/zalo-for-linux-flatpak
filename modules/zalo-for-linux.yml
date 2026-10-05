@@ -1,0 +1,77 @@
+name: zalo-for-linux
+buildsystem: simple
+builddir: true
+
+build-options:
+  append-path: /usr/lib/sdk/node22/bin:/usr/lib/sdk/rust-stable/bin
+  env:
+    NPM_CONFIG_CACHE: /run/build/zalo-for-linux/flatpak-node/npm-cache
+    NPM_CONFIG_NODEDIR: /usr/lib/sdk/node22
+    electron_config_cache: /run/build/zalo-for-linux/flatpak-node/electron-cache
+    ELECTRON_CACHE: /run/build/zalo-for-linux/flatpak-node/electron-cache
+    ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+    CARGO_HOME: /run/build/zalo-for-linux/cargo
+    CARGO_NET_OFFLINE: 'true'
+  arch:
+    x86_64:
+      append-path: /usr/lib/sdk/mingw-w64/bin:/usr/lib/sdk/toolchain-i386/bin
+
+sources:
+  - type: git
+    url: https://github.com/DMKha241/zalo-for-linux.git
+    branch: flatpak
+    commit: a2c6e01e8ad3aa136dc7eb51704762647966637a
+
+  # Node & cargo cache
+  - ../sources/node_modules.json
+  - ../sources/gyp-node_modules.json
+  - ../sources/cargo-crates.json
+
+  # Zalo macOS setup file
+  - type: file
+    url: https://res-download-pc.zadn.vn/mac/ZaloSetup-universal-26.10.10.dmg
+    sha256: 04052d973fc1fe0028b5e192cbe727bd0f7c51c8d1434574f91da8761508afce
+    dest: temp
+
+  # Zalo Windows setup file (for ocr models and call)
+  - type: file
+    url: https://res-download-pc.zadn.vn/win/ZaloSetup-26.10.10.exe
+    sha256: 8f8059620f92e5e1ad9423429e79c92e092b4fd33245ffb66c195a25994a97d7
+    dest: temp
+
+  # ONNX Runtime for Linux (for ocr runtime)
+  - type: file
+    only-arches:
+      - x86_64
+    url: https://github.com/microsoft/onnxruntime/releases/download/v1.30.0/onnxruntime-linux-x64-1.30.0.tgz
+    sha256: a5ed5a3cac51fbb2e90da632ae43d19212faaa20e76484e62bcb7c23ddb3b3fd
+    dest: temp
+
+  - type: file
+    only-arches:
+      - aarch64
+    url: https://github.com/microsoft/onnxruntime/releases/download/v1.30.0/onnxruntime-linux-aarch64-1.30.0.tgz
+    sha256: e16a27a8ed330bbc698df7330b0cf56e722f354e3bcc92118682c74ef3c3e3da
+    dest: temp
+
+  - type: file
+    path: ../com.zalo.linux.desktop
+    dest: flatpak
+
+  - type: file
+    path: ../com.zalo.linux.metainfo.xml
+    dest: flatpak
+
+  - type: file
+    path: ../scripts/setup-zalo-for-linux.sh
+    dest: flatpak
+
+  - type: file
+    path: ../scripts/install-zalo-for-linux.sh
+    dest: flatpak
+
+build-commands:
+  - chmod +x ./flatpak/setup-zalo-for-linux.sh
+  - chmod +x ./flatpak/install-zalo-for-linux.sh
+  - ./flatpak/setup-zalo-for-linux.sh
+  - ./flatpak/install-zalo-for-linux.sh

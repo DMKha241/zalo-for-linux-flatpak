@@ -1,0 +1,123 @@
+name: Build Zalo Flatpak
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    outputs:
+      zalo-version: ${{ steps.metadata.outputs.version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            artifact-arch: x64
+            runner: ubuntu-24.04
+          - arch: aarch64
+            artifact-arch: aarch64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    env:
+      FLATPAK_ARCH: ${{ matrix.arch }}
+      ARTIFACT_ARCH: ${{ matrix.artifact-arch }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Flatpak builder
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder jq
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+
+      - name: Determine artifact name
+        id: metadata
+        run: |
+          flatpak-builder --show-manifest com.zalo.linux.yml > .ci-resolved.json
+          version=$(jq -er '.modules[] | select(.name == "zalo-for-linux") | .sources[] | select((.url // "") | startswith("https://res-download-pc.zadn.vn/mac/ZaloSetup-universal-")) | .url | capture("ZaloSetup-universal-(?<version>[0-9]+\\.[0-9]+\\.[0-9]+)\\.dmg$").version' .ci-resolved.json)
+          commit=$(jq -er '.modules[] | select(.name == "zalo-for-linux") | .sources[] | select(.type == "git" and .url == "https://github.com/DMKha241/zalo-for-linux.git") | .commit[:7]' .ci-resolved.json)
+          artifact="Zalo-${version}-${commit}-${ARTIFACT_ARCH}.flatpak"
+          [[ "$artifact" =~ ^Zalo-[0-9]+\.[0-9]+\.[0-9]+-[0-9a-f]{7}-(x64|aarch64)\.flatpak$ ]]
+          echo "artifact=$artifact" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Build Flatpak
+        run: |
+          flatpak-builder --user --assumeyes --install-deps-from=flathub --force-clean --verbose --repo=repo dir com.zalo.linux.yml
+
+      - name: Export Flatpak bundle
+        env:
+          ARTIFACT: ${{ steps.metadata.outputs.artifact }}
+        run: |
+          flatpak build-bundle --arch="$FLATPAK_ARCH" --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo repo "$ARTIFACT" com.zalo.linux master
+          test -s "$ARTIFACT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.metadata.outputs.artifact }}
+          path: ${{ steps.metadata.outputs.artifact }}
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
+
+  release:
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    concurrency:
+      group: zalo-release-${{ needs.build.outputs.zalo-version }}
+      cancel-in-progress: false
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      ZALO_VERSION: ${{ needs.build.outputs.zalo-version }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: Zalo-*.flatpak
+          merge-multiple: true
+          path: dist
+
+      - name: Publish release
+        run: |
+          files=(dist/Zalo-*.flatpak)
+          [[ ${#files[@]} -eq 2 ]]
+          for file in "${files[@]}"; do test -s "$file"; done
+
+          if ! gh release view "$ZALO_VERSION" >/dev/null 2>&1; then
+            gh release create "$ZALO_VERSION" --target "$GITHUB_SHA" --title "Zalo $ZALO_VERSION" --notes "Flatpak builds for x64 and aarch64."
+          fi
+          gh api "repos/$GH_REPO/releases/tags/$ZALO_VERSION" > release.json
+          declare -A keep=()
+          while IFS= read -r name; do
+            [[ "$name" == Zalo-*.flatpak && "$name" != */* ]] || continue
+            if [[ -f "dist/$name" ]]; then
+              # Same filename includes the same upstream commit and architecture.
+              local_sha=$(sha256sum "dist/$name" | cut -d ' ' -f1)
+              digest=$(jq -r --arg name "$name" '.assets[] | select(.name == $name) | .digest // ""' release.json)
+              if [[ "$digest" != sha256:* ]]; then
+                mkdir -p previous
+                gh release download "$ZALO_VERSION" --pattern "$name" --dir previous
+                digest="sha256:$(sha256sum "previous/$name" | cut -d ' ' -f1)"
+              fi
+              if [[ "$digest" == "sha256:$local_sha" ]]; then
+                keep["$name"]=1
+                echo "Unchanged: $name"
+                continue
+              fi
+            fi
+            gh release delete-asset "$ZALO_VERSION" "$name" --yes
+          done < <(jq -r '.assets[].name' release.json)
+
+          for file in "${files[@]}"; do
+            name=${file##*/}
+            if [[ -z "${keep[$name]:-}" ]]; then
+              gh release upload "$ZALO_VERSION" "$file"
+            fi
+          done

@@ -1,0 +1,20 @@
+name: 7z
+buildsystem: simple
+
+sources:
+- type: archive
+  only-arches:
+    - x86_64
+  url: https://github.com/ip7z/7zip/releases/download/26.03/7z2603-linux-x64.tar.xz
+  sha256: dc99eff5008f1ab79bd7084c68513701547a808a89502bf4133683535ab3c695
+  strip-components: 0
+
+- type: archive
+  only-arches:
+    - aarch64
+  url: https://github.com/ip7z/7zip/releases/download/26.03/7z2603-linux-arm64.tar.xz
+  sha256: 2389ba20e4d8295e8709c20b6263b69bd1ec4972fe38a04ad7a1badbf595b996
+  strip-components: 0
+  
+build-commands:
+  - install -Dm0755 7zz /app/bin/7z
