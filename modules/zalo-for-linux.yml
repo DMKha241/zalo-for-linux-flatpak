@@ -19,7 +19,6 @@ build-options:
 sources:
   - type: git
     url: https://github.com/DMKha241/zalo-for-linux.git
-    branch: flatpak
     commit: a2c6e01e8ad3aa136dc7eb51704762647966637a
 
   # Node & cargo cache
@@ -39,27 +38,28 @@ sources:
     sha256: 8f8059620f92e5e1ad9423429e79c92e092b4fd33245ffb66c195a25994a97d7
     dest: temp
 
-  # Native CPU OCR runtime, built from the v1.30.0 tag on both supported architectures.
+  # Native CPU OCR runtime (ONNX Runtime 1.30.0)
   - type: archive
     url: https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.30.0.tar.gz
     sha256: f6681ecbddf53898adf0cc9e8e9e84657485b84d2eca3c8aa353de6d7dd417ef
     dest: flatpak-onnxruntime
 
-  # Pinned CPU dependency source archives, laid out as ORT's offline CMake mirror.
-  # Protoc is compiled from the matching Protobuf source, not downloaded as a binary.
   - ../sources/onnxruntime-deps.json
 
-  # Produce temp/onnxruntime-linux-{x64,aarch64}-1.30.0.tgz before OCR preparation.
   - type: file
     path: ../scripts/setup-onnxruntime.sh
     dest: flatpak
 
   - type: file
-    path: ../com.zalo.linux.desktop
+    path: ../scripts/build-logger.sh
     dest: flatpak
 
   - type: file
-    path: ../com.zalo.linux.metainfo.xml
+    path: ../net.vietnamlinuxfamily.zalo-for-linux.desktop
+    dest: flatpak
+
+  - type: file
+    path: ../net.vietnamlinuxfamily.zalo-for-linux.metainfo.xml
     dest: flatpak
 
   - type: file
@@ -71,6 +71,7 @@ sources:
     dest: flatpak
 
 build-commands:
+  - chmod +x ./flatpak/build-logger.sh
   - chmod +x ./flatpak/setup-onnxruntime.sh
   - sh ./flatpak/setup-onnxruntime.sh
   - chmod +x ./flatpak/setup-zalo-for-linux.sh

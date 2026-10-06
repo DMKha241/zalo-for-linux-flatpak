@@ -6,6 +6,7 @@ buildsystem: simple
 build-options:
   append-path: /app/toolchain/bin
 build-commands:
+- install -Dm755 build-logger.sh /app/toolchain/bin/build-logger
 - bash setup-toolchain.sh
 - install -Dm755 setup-toolchain.sh /app/toolchain/setup-toolchain.sh
 sources:
@@ -39,6 +40,9 @@ sources:
   url: https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz
   sha256: d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f
   dest: src/pyyaml
+# Shared compiler-build logger; show each original command and retain full output for failures.
+- type: file
+  path: ../scripts/build-logger.sh
 # Bootstrap compiler first; finish-linux runs after glibc32 is built by the dependency module.
 - type: inline
   dest-filename: setup-toolchain.sh
@@ -50,21 +54,22 @@ sources:
     jobs=${FLATPAK_BUILDER_N_JOBS:-2}
     export PATH="$prefix/bin:$PATH"
     sysroot="$prefix/sysroot"
+    logger="$prefix/bin/build-logger"
     # The compilers are deleted by cleanup; skip their large debug sections.
     export CFLAGS='-O2 -pipe' CXXFLAGS='-O2 -pipe'
 
     if test "${1:-bootstrap}" = finish-linux; then
       mkdir build-gcc-linux
       cd build-gcc-linux
-      "$src/gcc/configure" --prefix="$prefix" --target=i686-linux-gnu \
+      "$logger" configure.log "$src/gcc/configure" --prefix="$prefix" --target=i686-linux-gnu \
         --with-sysroot="$sysroot" --with-mpc="$prefix" --without-isl \
         --enable-languages=c,c++ --enable-threads=posix --enable-shared \
         --disable-bootstrap --disable-multilib --disable-nls \
         --disable-analyzer --disable-lto --disable-libstdcxx-pch \
         --disable-libatomic --disable-libgomp --disable-libquadmath \
         --disable-libssp --disable-libsanitizer --with-system-zlib
-      make -j"$jobs"
-      make install
+      "$logger" build.log make -j"$jobs"
+      "$logger" install.log make install
       cd ..
 
       exit 0
@@ -76,24 +81,24 @@ sources:
 
     mkdir build-mpc
     cd build-mpc
-    "$src/mpc/configure" --prefix="$prefix" --disable-shared
-    make -j"$jobs"
-    make install
+    "$logger" configure.log "$src/mpc/configure" --prefix="$prefix" --disable-shared
+    "$logger" build.log make -j"$jobs"
+    "$logger" install.log make install
     cd ..
 
     mkdir build-binutils-linux
     cd build-binutils-linux
-    "$src/binutils/configure" --prefix="$prefix" --target=i686-linux-gnu \
+    "$logger" configure.log "$src/binutils/configure" --prefix="$prefix" --target=i686-linux-gnu \
       --with-sysroot="$sysroot" --disable-multilib --disable-nls \
       --disable-gprofng \
       --disable-werror --with-system-zlib
-    make -j"$jobs"
-    make install
+    "$logger" build.log make -j"$jobs"
+    "$logger" install.log make install
     cd ..
 
     mkdir build-gcc-bootstrap
     cd build-gcc-bootstrap
-    "$src/gcc/configure" --prefix="$prefix" --target=i686-linux-gnu \
+    "$logger" configure.log "$src/gcc/configure" --prefix="$prefix" --target=i686-linux-gnu \
       --with-sysroot="$sysroot" --with-mpc="$prefix" --without-isl \
       --enable-languages=c --with-newlib --without-headers \
       --disable-bootstrap --disable-multilib --disable-nls \
@@ -101,8 +106,8 @@ sources:
       --disable-shared --disable-threads --disable-libatomic \
       --disable-libgomp --disable-libquadmath --disable-libssp \
       --disable-libsanitizer --with-system-zlib
-    make -j"$jobs" all-gcc all-target-libgcc
-    make install-gcc install-target-libgcc
+    "$logger" build.log make -j"$jobs" all-gcc all-target-libgcc
+    "$logger" install.log make install-gcc install-target-libgcc
     cd ..
 
     # Keep one bin directory: explicit -m32 uses i686; native builds use SDK GCC.
@@ -119,63 +124,64 @@ sources:
     exec /usr/bin/gcc "$@"
     EOF
     chmod +x "$prefix/bin/gcc"
-    printf 'int value;\n' | gcc -x c -c - -o check-native.o
+    printf 'int value;\n' > check.c
+    "$logger" check-native.log gcc -x c -c check.c -o check-native.o
     readelf -h check-native.o | grep -q 'Class:.*ELF64'
-    printf 'int value;\n' | gcc -m32 -x c -c - -o check-i386.o
+    "$logger" check-i386.log gcc -m32 -x c -c check.c -o check-i386.o
     readelf -h check-i386.o | grep -q 'Class:.*ELF32'
 
     mkdir build-binutils-mingw
     cd build-binutils-mingw
-    "$src/binutils/configure" --prefix="$prefix" --target=i686-w64-mingw32 \
+    "$logger" configure.log "$src/binutils/configure" --prefix="$prefix" --target=i686-w64-mingw32 \
       --disable-multilib --disable-nls --disable-gprofng \
       --disable-werror --with-system-zlib
-    make -j"$jobs"
-    make install
+    "$logger" build.log make -j"$jobs"
+    "$logger" install.log make install
     cd ..
 
     mkdir build-mingw-headers
     cd build-mingw-headers
-    "$src/mingw/mingw-w64-headers/configure" \
+    "$logger" configure.log "$src/mingw/mingw-w64-headers/configure" \
       --prefix="$prefix/i686-w64-mingw32" --host=i686-w64-mingw32 \
       --enable-sdk=all --enable-secure-api
-    make install
+    "$logger" install.log make install
     cd ..
 
     mkdir build-gcc-mingw
     cd build-gcc-mingw
-    "$src/gcc/configure" --prefix="$prefix" --target=i686-w64-mingw32 \
+    "$logger" configure.log "$src/gcc/configure" --prefix="$prefix" --target=i686-w64-mingw32 \
       --with-mpc="$prefix" --without-isl --with-system-zlib \
       --enable-languages=c --enable-threads=win32 --disable-bootstrap \
       --disable-multilib --disable-nls --disable-shared \
       --disable-analyzer --disable-lto \
       --disable-libatomic --disable-libgomp --disable-libquadmath \
       --disable-libssp --disable-libsanitizer
-    make -j"$jobs" all-gcc
-    make install-gcc
+    "$logger" build.log make -j"$jobs" all-gcc
+    "$logger" install.log make install-gcc
     cd ..
 
     mkdir build-mingw-crt
     cd build-mingw-crt
-    "$src/mingw/mingw-w64-crt/configure" \
+    "$logger" configure.log "$src/mingw/mingw-w64-crt/configure" \
       --prefix="$prefix/i686-w64-mingw32" --host=i686-w64-mingw32 \
       --disable-lib64 --enable-lib32
-    make -j"$jobs"
-    make install
+    "$logger" build.log make -j"$jobs"
+    "$logger" install.log make install
     cd ../build-gcc-mingw
-    make -j"$jobs" all-target-libgcc
-    make install-target-libgcc
+    "$logger" build-libgcc.log make -j"$jobs" all-target-libgcc
+    "$logger" install-libgcc.log make install-target-libgcc
     cd ..
 
     printf '#include <winsock2.h>\nint main(void) { WSADATA d; return WSAStartup(MAKEWORD(2,2), &d); }\n' > check-win.c
-    i686-w64-mingw32-gcc check-win.c -lws2_32 -o check.exe
+    "$logger" check-win.log i686-w64-mingw32-gcc check-win.c -lws2_32 -o check.exe
     objdump -f check.exe | grep -q 'file format pei-i386'
 
     # Native helper for the bundled Wine loader path.
     mkdir build-patchelf
     cd build-patchelf
-    "$src/patchelf/configure" --prefix=/app/toolchain
-    make -j"$jobs"
-    make install
+    "$logger" configure.log "$src/patchelf/configure" --prefix=/app/toolchain
+    "$logger" build.log make -j"$jobs"
+    "$logger" install.log make install
     cd ..
 
 ...

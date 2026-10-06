@@ -38,7 +38,7 @@ jobs:
       - name: Determine artifact name
         id: metadata
         run: |
-          flatpak-builder --show-manifest com.zalo.linux.yml > .ci-resolved.json
+          flatpak-builder --show-manifest net.vietnamlinuxfamily.zalo-for-linux.yml > .ci-resolved.json
           version=$(jq -er '.modules[] | select(.name == "zalo-for-linux") | .sources[] | select((.url // "") | startswith("https://res-download-pc.zadn.vn/mac/ZaloSetup-universal-")) | .url | capture("ZaloSetup-universal-(?<version>[0-9]+\\.[0-9]+\\.[0-9]+)\\.dmg$").version' .ci-resolved.json)
           commit=$(jq -er '.modules[] | select(.name == "zalo-for-linux") | .sources[] | select(.type == "git" and .url == "https://github.com/DMKha241/zalo-for-linux.git") | .commit[:7]' .ci-resolved.json)
           artifact="Zalo-${version}-${commit}-${ARTIFACT_ARCH}.flatpak"
@@ -46,15 +46,30 @@ jobs:
           echo "artifact=$artifact" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
+      # Reuse build state, sources and compiler outputs; the manifest remains the source of truth.
+      - name: Restore Flatpak build cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .flatpak-builder/cache
+            .flatpak-builder/downloads
+            .flatpak-builder/git
+            .flatpak-builder/ccache
+          key: flatpak-${{ matrix.arch }}-26.08-${{ hashFiles('net.vietnamlinuxfamily.zalo-for-linux.yml', 'modules/*.yml', 'scripts/*.sh', 'sources/*.json') }}
+          restore-keys: |
+            flatpak-${{ matrix.arch }}-26.08-
+
       - name: Build Flatpak
         run: |
-          flatpak-builder --user --assumeyes --install-deps-from=flathub --force-clean --verbose --repo=repo dir com.zalo.linux.yml
+          mkdir -p .flatpak-builder/ccache
+          printf 'max_size = 1GiB\n' > .flatpak-builder/ccache/ccache.conf
+          flatpak-builder --user --assumeyes --install-deps-from=flathub --force-clean --ccache --repo=repo dir net.vietnamlinuxfamily.zalo-for-linux.yml
 
       - name: Export Flatpak bundle
         env:
           ARTIFACT: ${{ steps.metadata.outputs.artifact }}
         run: |
-          flatpak build-bundle --arch="$FLATPAK_ARCH" --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo repo "$ARTIFACT" com.zalo.linux master
+          flatpak build-bundle --arch="$FLATPAK_ARCH" --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo repo "$ARTIFACT" net.vietnamlinuxfamily.zalo-for-linux master
           test -s "$ARTIFACT"
 
       - uses: actions/upload-artifact@v4

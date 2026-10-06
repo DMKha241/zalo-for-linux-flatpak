@@ -230,6 +230,7 @@ sources:
     src="$PWD/src"
     sysroot=/app/toolchain/sysroot
     jobs=${FLATPAK_BUILDER_N_JOBS:-2}
+    logger=/app/toolchain/bin/build-logger
     export PATH="/app/toolchain/bin:$PATH"
     native_cflags=${CFLAGS:-}
     native_ldflags=${LDFLAGS:-}
@@ -243,11 +244,11 @@ sources:
     # Bootstrap GCC is now available; build the target libc before completing GCC.
     mkdir build-glibc
     cd build-glibc
-    CFLAGS=-O2 "$src/glibc/configure" --prefix=/usr \
+    "$logger" configure.log env CFLAGS=-O2 "$src/glibc/configure" --prefix=/usr \
         --host=i686-linux-gnu --build="$("$src/glibc/scripts/config.guess")" \
         --with-headers="$sysroot/usr/include" --disable-werror
-    make -j"$jobs"
-    make install DESTDIR="$sysroot"
+    "$logger" build.log make -j"$jobs"
+    "$logger" install.log make install DESTDIR="$sysroot"
     cd ..
     bash /app/toolchain/setup-toolchain.sh finish-linux
 
@@ -275,10 +276,10 @@ sources:
         (
             cd "build-$name"
             # Supply glibc zero-size allocation results: malloc is non-NULL, realloc(ptr, 0) is NULL.
-            ac_cv_func_malloc_0_nonnull=yes xorg_cv_malloc0_returns_null=yes "$src/$name/configure" --prefix=/app --libdir=/app/lib/i386-linux-gnu \
+            "$logger" configure.log env ac_cv_func_malloc_0_nonnull=yes xorg_cv_malloc0_returns_null=yes "$src/$name/configure" --prefix=/app --libdir=/app/lib/i386-linux-gnu \
                 --host=i686-linux-gnu --build="$(gcc -dumpmachine)" "$@"
-            make -j"$jobs"
-            make install DESTDIR="$sysroot"
+            "$logger" build.log make -j"$jobs"
+            "$logger" install.log make install DESTDIR="$sysroot"
             # Libtool archives contain unstaged /app paths; shared libraries do not need them.
             find "$sysroot/app/lib/i386-linux-gnu" -name '*.la' -delete
         )
@@ -286,19 +287,19 @@ sources:
     meson_build() {
         local name=$1
         shift
-        meson setup "build-$name" "$src/$name" --cross-file="$PWD/i386.ini" \
+        "$logger" "$name-configure.log" meson setup "build-$name" "$src/$name" --cross-file="$PWD/i386.ini" \
             --prefix=/app --libdir=lib/i386-linux-gnu --wrap-mode=nodownload \
             -Dauto_features=disabled "$@"
-        ninja -C "build-$name" -j"$jobs"
-        DESTDIR="$sysroot" ninja -C "build-$name" install
+        "$logger" "$name-build.log" ninja -C "build-$name" -j"$jobs"
+        "$logger" "$name-install.log" env DESTDIR="$sysroot" ninja -C "build-$name" install
     }
 
     mkdir build-zlib
     (
         cd build-zlib
-        CHOST=i686-linux-gnu "$src/zlib/configure" --prefix=/app --libdir=/app/lib/i386-linux-gnu
-        make -j"$jobs"
-        make install DESTDIR="$sysroot"
+        "$logger" configure.log env CHOST=i686-linux-gnu "$src/zlib/configure" --prefix=/app --libdir=/app/lib/i386-linux-gnu
+        "$logger" build.log make -j"$jobs"
+        "$logger" install.log make install DESTDIR="$sysroot"
     )
     auto expat --disable-static --without-docbook --without-examples --without-tests
     auto libpng --disable-static
@@ -314,13 +315,13 @@ sources:
     auto libsndfile --disable-static --disable-external-libs --disable-mpeg \
         --disable-programs --disable-examples --disable-regtest
     auto alsa --disable-static
-    cmake -S "$src/jpeg" -B build-jpeg -G Ninja \
+    "$logger" jpeg-configure.log cmake -S "$src/jpeg" -B build-jpeg -G Ninja \
         -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=i686 \
         -DCMAKE_C_COMPILER=i686-linux-gnu-gcc -DCMAKE_SYSROOT="$sysroot" \
         -DCMAKE_INSTALL_PREFIX=/app -DCMAKE_INSTALL_LIBDIR=lib/i386-linux-gnu \
         -DENABLE_SHARED=ON -DENABLE_STATIC=OFF -DWITH_TURBOJPEG=OFF
-    ninja -C build-jpeg -j"$jobs"
-    DESTDIR="$sysroot" ninja -C build-jpeg install
+    "$logger" jpeg-build.log ninja -C build-jpeg -j"$jobs"
+    "$logger" jpeg-install.log env DESTDIR="$sysroot" ninja -C build-jpeg install
     meson_build v4l -Dv4l-utils=false -Dv4l-plugins=false -Dv4l-wrappers=false -Djpeg=enabled
     meson_build pulse -Ddaemon=false -Dclient=true -Ddoxygen=false -Dman=false -Dtests=false
 
@@ -342,13 +343,13 @@ sources:
     # Build the native portal helper with SDK libraries, then both V4L2 shims.
     native_pkg="/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig"
     mkdir -p /app/bin
-    gcc $native_cflags camera-portal.c $native_ldflags -o /app/bin/zalo-camera-portal \
+    "$logger" camera-portal.log gcc $native_cflags camera-portal.c $native_ldflags -o /app/bin/zalo-camera-portal \
         $(PKG_CONFIG_LIBDIR="$native_pkg" PKG_CONFIG_SYSROOT_DIR= pkg-config --cflags --libs gio-unix-2.0)
-    env -u PKG_CONFIG_LIBDIR -u PKG_CONFIG_SYSROOT_DIR -u CPPFLAGS -u CFLAGS -u CXXFLAGS -u LDFLAGS \
+    "$logger" pipewire-native-configure.log env -u PKG_CONFIG_LIBDIR -u PKG_CONFIG_SYSROOT_DIR -u CPPFLAGS -u CFLAGS -u CXXFLAGS -u LDFLAGS \
         meson setup build-pw-native "$src/pipewire" --prefix=/app \
         -Dauto_features=disabled -Dpipewire-v4l2=enabled -Dpipewire-jack=disabled \
         -Dsession-managers=[] -Dtests=disabled -Dexamples=disabled -Dflatpak=disabled
-    ninja -C build-pw-native -j"$jobs" pipewire-v4l2/src/libpw-v4l2.so
+    "$logger" pipewire-native-build.log ninja -C build-pw-native -j"$jobs" pipewire-v4l2/src/libpw-v4l2.so
     install -Dm755 build-pw-native/pipewire-v4l2/src/libpw-v4l2.so \
         /app/pw-v4l2/lib/x86_64-linux-gnu/libpw-v4l2.so
     # D-Bus/Camera permission runs in the native helper; PipeWire32 only uses its authorized FD.
@@ -368,12 +369,22 @@ sources:
             find "$directory" -maxdepth 1 -name '*.so*' -exec cp -a -t "$runtime" {} +
         fi
     done
-    for directory in etc share; do
-        if test -d "$sysroot/app/$directory"; then
-            mkdir -p "/app/$directory"
-            cp -a "$sysroot/app/$directory/." "/app/$directory/"
-        fi
-    done
+    if test -d "$sysroot/app/etc"; then
+        mkdir -p /app/etc
+        cp -a "$sysroot/app/etc/." /app/etc/
+    fi
+    if test -d "$sysroot/app/share"; then
+        mkdir -p /app/share/locale
+        find "$sysroot/app/share" -mindepth 1 -maxdepth 1 ! -name locale \
+            -exec cp -a -t /app/share {} +
+        # Flatpak's locale extension leaves per-language symlinks in /app/share/locale.
+        for locale in "$sysroot/app/share/locale/"*; do
+            test -d "$locale" || continue
+            target="/app/share/locale/${locale##*/}"
+            mkdir -p "$target"
+            cp -a "$locale/." "$target/"
+        done
+    fi
     # Link and load the same bundled i386 libraries the bridge will use.
     cat > check.c <<'C'
     #include <X11/Xlib.h>
@@ -393,6 +404,6 @@ sources:
         return !symbols[0] || !symbols[1];
     }
     C
-    i686-linux-gnu-gcc $CPPFLAGS $LDFLAGS check.c -lX11 -lxcb -lXext -ldl -o check
+    "$logger" check.log i686-linux-gnu-gcc $CPPFLAGS $LDFLAGS check.c -lX11 -lxcb -lXext -ldl -o check
     readelf -h check | grep -q 'Class:.*ELF32'
     "$runtime/ld-linux.so.2" --library-path "$runtime:$runtime/pulseaudio" ./check

@@ -10,10 +10,11 @@ esac
 onnx_source=flatpak-onnxruntime
 onnx_build="$onnx_source/_build"
 onnx_package="onnxruntime-linux-$onnx_arch-1.30.0"
+logger=./flatpak/build-logger.sh
 test "$(cat "$onnx_source/VERSION_NUMBER")" = 1.30.0
 
 # Upstream supports keeping diagnostics non-fatal with newer SDK compilers.
-cmake --compile-no-warning-as-error -S "$onnx_source/cmake" -B "$onnx_build" -G Ninja \
+"$logger" onnxruntime-configure.log cmake --compile-no-warning-as-error -S "$onnx_source/cmake" -B "$onnx_build" -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -Donnxruntime_BUILD_SHARED_LIB=ON \
     -Donnxruntime_BUILD_UNIT_TESTS=OFF \
@@ -21,7 +22,7 @@ cmake --compile-no-warning-as-error -S "$onnx_source/cmake" -B "$onnx_build" -G 
     -Donnxruntime_ENABLE_PYTHON=OFF \
     -Donnxruntime_USE_TELEMETRY=OFF \
     -Donnxruntime_CMAKE_DEPS_MIRROR_DIR="$PWD/flatpak-onnx-deps"
-cmake --build "$onnx_build" --target onnxruntime --parallel "${FLATPAK_BUILDER_N_JOBS:-2}"
+"$logger" onnxruntime-build.log cmake --build "$onnx_build" --target onnxruntime --parallel "${FLATPAK_BUILDER_N_JOBS:-2}"
 
 # Match the upstream archive layout consumed by patch-zocr-runtime.js.
 mkdir -p "temp/$onnx_package/lib" "temp/$onnx_package/include"
