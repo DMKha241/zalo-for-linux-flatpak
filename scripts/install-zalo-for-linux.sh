@@ -2,7 +2,12 @@
 set -eu
 
 install -d /app/lib/zalo
-cp -a dist/linux-unpacked/. /app/lib/zalo/
+case "$(uname -m)" in
+    x86_64) ELECTRON_OUTPUT_DIR=linux-unpacked ;;
+    aarch64) ELECTRON_OUTPUT_DIR=linux-arm64-unpacked ;;
+    *) echo "Unsupported architecture: $(uname -m)" >&2; exit 1 ;;
+esac
+cp -a "dist/$ELECTRON_OUTPUT_DIR/." /app/lib/zalo/
 
 install -Dm0755 /dev/stdin /app/bin/zalo <<'EOF'
 #!/bin/sh

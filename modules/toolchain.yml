@@ -50,6 +50,8 @@ sources:
     jobs=${FLATPAK_BUILDER_N_JOBS:-2}
     export PATH="$prefix/bin:$PATH"
     sysroot="$prefix/sysroot"
+    # The compilers are deleted by cleanup; skip their large debug sections.
+    export CFLAGS='-O2 -pipe' CXXFLAGS='-O2 -pipe'
 
     if test "${1:-bootstrap}" = finish-linux; then
       mkdir build-gcc-linux
@@ -58,6 +60,7 @@ sources:
         --with-sysroot="$sysroot" --with-mpc="$prefix" --without-isl \
         --enable-languages=c,c++ --enable-threads=posix --enable-shared \
         --disable-bootstrap --disable-multilib --disable-nls \
+        --disable-analyzer --disable-lto --disable-libstdcxx-pch \
         --disable-libatomic --disable-libgomp --disable-libquadmath \
         --disable-libssp --disable-libsanitizer --with-system-zlib
       make -j"$jobs"
@@ -82,6 +85,7 @@ sources:
     cd build-binutils-linux
     "$src/binutils/configure" --prefix="$prefix" --target=i686-linux-gnu \
       --with-sysroot="$sysroot" --disable-multilib --disable-nls \
+      --disable-gprofng \
       --disable-werror --with-system-zlib
     make -j"$jobs"
     make install
@@ -93,6 +97,7 @@ sources:
       --with-sysroot="$sysroot" --with-mpc="$prefix" --without-isl \
       --enable-languages=c --with-newlib --without-headers \
       --disable-bootstrap --disable-multilib --disable-nls \
+      --disable-analyzer --disable-lto \
       --disable-shared --disable-threads --disable-libatomic \
       --disable-libgomp --disable-libquadmath --disable-libssp \
       --disable-libsanitizer --with-system-zlib
@@ -122,7 +127,8 @@ sources:
     mkdir build-binutils-mingw
     cd build-binutils-mingw
     "$src/binutils/configure" --prefix="$prefix" --target=i686-w64-mingw32 \
-      --disable-multilib --disable-nls --disable-werror --with-system-zlib
+      --disable-multilib --disable-nls --disable-gprofng \
+      --disable-werror --with-system-zlib
     make -j"$jobs"
     make install
     cd ..
@@ -141,6 +147,7 @@ sources:
       --with-mpc="$prefix" --without-isl --with-system-zlib \
       --enable-languages=c --enable-threads=win32 --disable-bootstrap \
       --disable-multilib --disable-nls --disable-shared \
+      --disable-analyzer --disable-lto \
       --disable-libatomic --disable-libgomp --disable-libquadmath \
       --disable-libssp --disable-libsanitizer
     make -j"$jobs" all-gcc
