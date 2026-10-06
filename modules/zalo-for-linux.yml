@@ -71,6 +71,7 @@ sources:
     dest: flatpak
 
 build-commands:
+  - chmod +x ./flatpak/setup-onnxruntime.sh
   - sh ./flatpak/setup-onnxruntime.sh
   - chmod +x ./flatpak/setup-zalo-for-linux.sh
   - chmod +x ./flatpak/install-zalo-for-linux.sh

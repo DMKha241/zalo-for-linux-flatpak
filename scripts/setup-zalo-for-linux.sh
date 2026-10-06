@@ -8,6 +8,7 @@ node -e '
   await require("./scripts/prepare-app").main();
   if (process.arch === "x64") process.env.PATH = `/app/toolchain/bin:${process.env.PATH}`;
   await require("./scripts/setup-zcall-bridge").main();
+  await require("./scripts/clean-unused").main();
 })().catch(error => {
   console.error(error);
   process.exitCode = 1;

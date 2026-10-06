@@ -34,8 +34,8 @@ finish-args:
     - --talk-name=org.ayatana.indicator.application
 
 modules:
-  - modules/dependencies.yml
   - modules/toolchain.yml
+  - modules/dependencies.yml
   - modules/7z.yml
   - modules/zalo-for-linux.yml
   - modules/wine.yml

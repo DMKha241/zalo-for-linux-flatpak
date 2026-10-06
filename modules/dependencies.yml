@@ -21,7 +21,7 @@ sources:
   dest: src/glibc
 # Reuse the same GCC source for the deferred libc-dependent stage (including libgcc/libstdc++ runtimes).
 - type: archive
-  url: https://ftp.gnu.org/gnu/gcc/gcc-16.2.0/gcc-16.2.0.tar.xz
+  url: https://mirrors.kernel.org/gnu/gcc/gcc-16.2.0/gcc-16.2.0.tar.xz
   sha256: e6738e29597f733270731aa90600f37ffdc045079dfc27ec7e8192cc81085c3e
   dest: src/gcc
 # X11 display-manager protocol library required by libxcb.
@@ -121,12 +121,12 @@ sources:
   dest: src/alsa
 # Cryptographic primitives for Wine TLS through GnuTLS.
 - type: archive
-  url: https://ftp.gnu.org/gnu/nettle/nettle-3.10.2.tar.gz
+  url: https://mirrors.kernel.org/gnu/nettle/nettle-3.10.2.tar.gz
   sha256: fe9ff51cb1f2abb5e65a6b8c10a92da0ab5ab6eaf26e7fc2b675c45f1fb519b5
   dest: src/nettle
 # ASN.1 certificate parsing required by GnuTLS.
 - type: archive
-  url: https://ftp.gnu.org/gnu/libtasn1/libtasn1-4.20.0.tar.gz
+  url: https://mirrors.kernel.org/gnu/libtasn1/libtasn1-4.20.0.tar.gz
   sha256: 92e0e3bd4c02d4aeee76036b2ddd83f0c732ba4cda5cb71d583272b23587a76c
   dest: src/libtasn1
 # TLS/certificate support loaded by Wine crypt32/secur32.
@@ -166,7 +166,7 @@ sources:
   dest: src/fontconfig
 # Target i386 multiprecision arithmetic for Nettle/GnuTLS (separate from the SDK native GMP).
 - type: archive
-  url: https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz
+  url: https://mirrors.kernel.org/gnu/gmp/gmp-6.3.0.tar.xz
   sha256: a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898
   dest: src/gmp
 # Sound-file library required when building the PulseAudio client library.
