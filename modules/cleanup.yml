@@ -1,0 +1,7 @@
+# Run last: installers are extracted, native app packaging and Wine patching are complete.
+name: cleanup
+buildsystem: simple
+build-commands:
+  # Toolchain is x64-only; 7z is build-only on both supported architectures.
+  - rm -rf /app/toolchain
+  - rm -f /app/bin/7z

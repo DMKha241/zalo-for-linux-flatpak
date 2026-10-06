@@ -1,0 +1,398 @@
+# Runtime dependencies shipped with x64 builds; all target libraries here are i386.
+# Keep headers/compiler files in the private sysroot, separate from native app builds.
+name: dependencies
+only-arches:
+- x86_64
+buildsystem: simple
+build-options:
+  append-path: /app/toolchain/bin
+cleanup:
+- /lib/i386-linux-gnu/*.a
+- /lib/i386-linux-gnu/*.la
+- /lib/i386-linux-gnu/pkgconfig
+build-commands:
+- python3 patch-pipewire-camera.py src/pipewire
+- bash setup-dependencies.sh
+sources:
+# 32-bit libc, loader and startup files for Wine. The SDK only supplies their native x64 versions.
+- type: archive
+  url: https://mirrors.kernel.org/gnu/glibc/glibc-2.44.tar.xz
+  sha256: 37f600f2bef3c5e8300147059568b2a2e40a7ad6ccc65ce942556d49429cc667
+  dest: src/glibc
+# Reuse the same GCC source for the deferred libc-dependent stage (including libgcc/libstdc++ runtimes).
+- type: archive
+  url: https://ftp.gnu.org/gnu/gcc/gcc-16.2.0/gcc-16.2.0.tar.xz
+  sha256: e6738e29597f733270731aa90600f37ffdc045079dfc27ec7e8192cc81085c3e
+  dest: src/gcc
+# X11 display-manager protocol library required by libxcb.
+- type: archive
+  url: https://www.x.org/releases/individual/lib/libXdmcp-1.1.5.tar.xz
+  sha256: d8a5222828c3adab70adf69a5583f1d32eb5ece04304f7f8392b6a353aa2228c
+  dest: src/Xdmcp
+# XCB client libraries for streamproxy, Wine X11 and Mesa GLX/DRI.
+- type: archive
+  url: https://xcb.freedesktop.org/dist/libxcb-1.17.0.tar.xz
+  sha256: 599ebf9996710fea71622e6e184f3a8ad5b43d0e5fa8c4e407123c88a59a6d55
+  dest: src/xcb
+# Xlib and Xlib-XCB bridge for Wine windows, streamproxy and Mesa.
+- type: archive
+  url: https://www.x.org/releases/individual/lib/libX11-1.8.12.tar.xz
+  sha256: fa026f9bb0124f4d6c808f9aef4057aad65e7b35d8ff43951cef0abe06bb9a9a
+  dest: src/X11
+# X11 extensions needed by Wine and the 32-bit bridge.
+- type: archive
+  url: https://www.x.org/releases/individual/lib/libXext-1.3.6.tar.xz
+  sha256: edb59fa23994e405fdc5b400afdf5820ae6160b94f35e3dc3da4457a16e89753
+  dest: src/Xext
+# XRender compositing support used by Wine and Xcursor.
+- type: archive
+  url: https://www.x.org/releases/individual/lib/libXrender-0.9.12.tar.xz
+  sha256: b832128da48b39c8d608224481743403ad1691bf4e554e4be9c174df171d1b97
+  dest: src/Xrender
+# Monitor geometry and display modes used by Wine X11.
+- type: archive
+  url: https://www.x.org/releases/individual/lib/libXrandr-1.5.4.tar.xz
+  sha256: 1ad5b065375f4a85915aa60611cc6407c060492a214d7f9daf214be752c3b4d3
+  dest: src/Xrandr
+# X11 cursor/region operations required by Wine and related X11 libraries.
+- type: archive
+  url: https://www.x.org/releases/individual/lib/libXfixes-6.0.1.tar.xz
+  sha256: b695f93cd2499421ab02d22744458e650ccc88c1d4c8130d60200213abc02d58
+  dest: src/Xfixes
+# Cursor rendering for Wine windows.
+- type: archive
+  url: https://www.x.org/releases/individual/lib/libXcursor-1.2.3.tar.xz
+  sha256: fde9402dd4cfe79da71e2d96bb980afc5e6ff4f8a7d74c159e1966afb2b2c2c0
+  dest: src/Xcursor
+# XInput support for mouse/keyboard input in Wine.
+- type: archive
+  url: https://www.x.org/releases/individual/lib/libXi-1.8.2.tar.xz
+  sha256: d0e0555e53d6e2114eabfa44226ba162d2708501a25e18d99cfb35c094c6c104
+  dest: src/Xi
+# Multi-monitor queries used by Wine.
+- type: archive
+  url: https://www.x.org/releases/individual/lib/libXinerama-1.1.5.tar.xz
+  sha256: 5094d1f0fcc1828cb1696d0d39d9e866ae32520c54d01f618f1a3c1e30c2085c
+  dest: src/Xinerama
+# Legacy X11 video-mode queries used by Wine OpenGL.
+- type: archive
+  url: https://www.x.org/releases/individual/lib/libXxf86vm-1.1.6.tar.xz
+  sha256: 96af414c73ce1d5449ad04be7f9f27fa8330f844b6dda843ef22e3e1befb3ee3
+  dest: src/Xxf86vm
+# X11 window compositing support used by Wine.
+- type: archive
+  url: https://www.x.org/releases/individual/lib/libXcomposite-0.4.6.tar.xz
+  sha256: fe40bcf0ae1a09070eba24088a5eb9810efe57453779ec1e20a55080c6dc2c87
+  dest: src/Xcomposite
+# PCI device access library required by libdrm hardware backends.
+- type: archive
+  url: https://www.x.org/releases/individual/lib/libpciaccess-0.18.1.tar.xz
+  sha256: 4af43444b38adb5545d0ed1c2ce46d9608cc47b31c2387fc5181656765a6fa76
+  dest: src/pciaccess
+# Shared compression library used by PNG/font/image dependencies.
+- type: archive
+  url: https://zlib.net/fossils/zlib-1.3.1.tar.gz
+  sha256: 9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23
+  dest: src/zlib
+# XML parser required by Fontconfig and Mesa.
+- type: archive
+  url: https://github.com/libexpat/libexpat/releases/download/R_2_7_3/expat-2.7.3.tar.xz
+  sha256: 71df8f40706a7bb0a80a5367079ea75d91da4f8c65c58ec59bcdfbf7decdab9f
+  dest: src/expat
+# PNG support for FreeType fonts.
+- type: archive
+  url: https://downloads.sourceforge.net/libpng/libpng-1.6.50.tar.xz
+  sha256: 4df396518620a7aa3651443e87d1b2862e4e88cad135a8b93423e01706232307
+  dest: src/libpng
+# Font rasterization required by Wine UI and text rendering.
+- type: archive
+  url: https://downloads.sourceforge.net/freetype/freetype-2.14.1.tar.xz
+  sha256: 32427e8c471ac095853212a37aef816c60b42052d4d9e48230bab3bdf2936ccc
+  dest: src/freetype
+# Client libraries for Wine audio; connect to host PulseAudio/PipeWire, do not run a daemon.
+- type: archive
+  url: https://freedesktop.org/software/pulseaudio/releases/pulseaudio-17.0.tar.xz
+  sha256: 053794d6671a3e397d849e478a80b82a63cb9d8ca296bd35b73317bb5ceb87b5
+  dest: src/pulse
+# ALSA client backend loaded by Wine audio.
+- type: archive
+  url: https://www.alsa-project.org/files/pub/lib/alsa-lib-1.2.14.tar.bz2
+  sha256: be9c88a0b3604367dd74167a2b754a35e142f670292ae47a2fdef27a2ee97a32
+  dest: src/alsa
+# Cryptographic primitives for Wine TLS through GnuTLS.
+- type: archive
+  url: https://ftp.gnu.org/gnu/nettle/nettle-3.10.2.tar.gz
+  sha256: fe9ff51cb1f2abb5e65a6b8c10a92da0ab5ab6eaf26e7fc2b675c45f1fb519b5
+  dest: src/nettle
+# ASN.1 certificate parsing required by GnuTLS.
+- type: archive
+  url: https://ftp.gnu.org/gnu/libtasn1/libtasn1-4.20.0.tar.gz
+  sha256: 92e0e3bd4c02d4aeee76036b2ddd83f0c732ba4cda5cb71d583272b23587a76c
+  dest: src/libtasn1
+# TLS/certificate support loaded by Wine crypt32/secur32.
+- type: archive
+  url: https://www.gnupg.org/ftp/gcrypt/gnutls/v3.8/gnutls-3.8.11.tar.xz
+  sha256: 91bd23c4a86ebc6152e81303d20cf6ceaeb97bc8f84266d0faec6e29f17baa20
+  dest: src/gnutls
+# Shared-memory fences required by Mesa DRI3 buffer synchronization with X11/Xwayland.
+- type: archive
+  url: https://www.x.org/releases/individual/lib/libxshmfence-1.3.3.tar.xz
+  sha256: d4a4df096aba96fea02c029ee3a44e11a47eb7f7213c1a729be83e85ec3fde10
+  dest: src/xshmfence
+# DRM userspace support for bundled Mesa; this does not grant additional device permissions.
+- type: archive
+  url: https://dri.freedesktop.org/libdrm/libdrm-2.4.125.tar.xz
+  sha256: d4bae92797a50f81a93524762e0410a49cd84cfa0f997795bc0172ac8fb1d96a
+  dest: src/drm
+# Compression library required by Mesa shader/cache code.
+- type: archive
+  url: https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz
+  sha256: eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3
+  dest: src/zstd-root
+# Bundle 32-bit OpenGL/EGL instead of GL32. Nouveau plus softpipe; LLVM-dependent drivers are omitted.
+- type: archive
+  url: https://archive.mesa3d.org/mesa-26.2.4.tar.xz
+  sha256: bce5f7fbebb934373b86c999a064d52fb5065878dc57f287f95346648ec832e9
+  dest: src/mesa
+# X11 authentication library required by libxcb.
+- type: archive
+  url: https://www.x.org/releases/individual/lib/libXau-1.0.12.tar.xz
+  sha256: 74d0e4dfa3d39ad8939e99bda37f5967aba528211076828464d2777d477fc0fb
+  dest: src/Xau
+# Font discovery/configuration required by Wine; ship its configuration with the libraries.
+- type: archive
+  url: https://gitlab.freedesktop.org/api/v4/projects/890/packages/generic/fontconfig/2.17.1/fontconfig-2.17.1.tar.xz
+  sha256: 9f5cae93f4fffc1fbc05ae99cdfc708cd60dfd6612ffc0512827025c026fa541
+  dest: src/fontconfig
+# Target i386 multiprecision arithmetic for Nettle/GnuTLS (separate from the SDK native GMP).
+- type: archive
+  url: https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz
+  sha256: a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898
+  dest: src/gmp
+# Sound-file library required when building the PulseAudio client library.
+- type: archive
+  url: https://github.com/libsndfile/libsndfile/releases/download/1.2.2/libsndfile-1.2.2.tar.xz
+  sha256: 3799ca9924d3125038880367bf1468e53a1b7e3686a934f098b7e1d286cdb80e
+  dest: src/libsndfile
+# libv4l2/libv4lconvert for Wine capture; device access is redirected through PipeWire.
+- type: archive
+  url: https://www.linuxtv.org/downloads/v4l-utils/v4l-utils-1.30.1.tar.xz
+  sha256: c1cf549c2ec3cf39eb5ec7bf15731349e61b26a21b5e963922db422333bae197
+  dest: src/v4l
+# JPEG decoder required by libv4lconvert for MJPEG webcams.
+- type: archive
+  url: https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.1.1/libjpeg-turbo-3.1.1.tar.gz
+  sha256: aadc97ea91f6ef078b0ae3a62bba69e008d9a7db19b34e4ac973b19b71b4217c
+  dest: src/jpeg
+# Bundle PipeWire32 core/SPA plugins and both V4L2 shims. Camera portal FD replaces raw /dev access.
+- type: archive
+  url: https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/1.6.8/pipewire-1.6.8.tar.gz
+  sha256: 8181172a1d95131f6af8bbc0b98f90b2a33349b042b84c3ce57dd5d11348cc58
+  dest: src/pipewire
+# Native x64 portal helper: request camera access and pass the authorized PipeWire FD to Wine32.
+- type: file
+  path: ../sources/camera-portal.c
+# Patch the pinned PipeWire source; assertions fail if its connection implementation changes.
+- type: file
+  path: ../scripts/patch-pipewire-camera.py
+# Cross-ABI IPC: spawn the native helper and receive its camera FD without a post-fork Wine deadlock.
+- type: file
+  path: ../sources/camera-remote.h
+  dest: src/pipewire/pipewire-v4l2/src
+# Let Wine stat /dev/videoN as a virtual character device, only after PipeWire can open that camera.
+- type: file
+  path: ../sources/camera-stat.h
+  dest: src/pipewire/pipewire-v4l2/src
+# Meson cross configuration: isolate pkg-config from native x64 libraries.
+- type: inline
+  dest-filename: i386.ini
+  contents: |
+    [binaries]
+    c = 'i686-linux-gnu-gcc'
+    cpp = 'i686-linux-gnu-g++'
+    ar = 'i686-linux-gnu-ar'
+    strip = 'i686-linux-gnu-strip'
+    pkg-config = 'pkg-config'
+    [properties]
+    sys_root = '/app/toolchain/sysroot'
+    pkg_config_libdir = ['/app/toolchain/sysroot/app/lib/i386-linux-gnu/pkgconfig', '/usr/share/pkgconfig']
+    [host_machine]
+    system = 'linux'
+    cpu_family = 'x86'
+    cpu = 'i686'
+    endian = 'little'
+# Build/stage runtime libraries in the private sysroot, then copy only runtime files into /app.
+- type: inline
+  dest-filename: setup-dependencies.sh
+  contents: |
+    #!/bin/bash
+    set -euo pipefail
+    src="$PWD/src"
+    sysroot=/app/toolchain/sysroot
+    jobs=${FLATPAK_BUILDER_N_JOBS:-2}
+    export PATH="/app/toolchain/bin:$PATH"
+    native_cflags=${CFLAGS:-}
+    native_ldflags=${LDFLAGS:-}
+    python_version=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
+    export PYTHONPATH="/app/toolchain/lib/python$python_version/site-packages${PYTHONPATH:+:$PYTHONPATH}"
+
+    mkdir -p "$sysroot/usr/include"
+    cp -a /usr/include/linux /usr/include/asm-generic \
+      /usr/lib/x86_64-linux-gnu/include/asm "$sysroot/usr/include/"
+
+    # Bootstrap GCC is now available; build the target libc before completing GCC.
+    mkdir build-glibc
+    cd build-glibc
+    CFLAGS=-O2 "$src/glibc/configure" --prefix=/usr \
+        --host=i686-linux-gnu --build="$("$src/glibc/scripts/config.guess")" \
+        --with-headers="$sysroot/usr/include" --disable-werror
+    make -j"$jobs"
+    make install DESTDIR="$sysroot"
+    cd ..
+    bash /app/toolchain/setup-toolchain.sh finish-linux
+
+    # Reuse architecture-independent SDK protocol headers and build generators.
+    cp -a /usr/include/X11 /usr/include/GL "$sysroot/usr/include/"
+    mkdir -p "$sysroot/usr/share"
+    cp -a /usr/share/xcb "$sysroot/usr/share/"
+    # xcb-proto.pc prefixes generator paths with pc_sysrootdir as well.
+    python_pkg=$(python3 -c 'import xcbgen; print(xcbgen.__path__[0])')
+    mkdir -p "$sysroot$(dirname "$python_pkg")"
+    cp -a "$python_pkg" "$sysroot$(dirname "$python_pkg")/"
+    export PKG_CONFIG_LIBDIR="$sysroot/app/lib/i386-linux-gnu/pkgconfig:/usr/share/pkgconfig"
+    export PKG_CONFIG_SYSROOT_DIR="$sysroot"
+    export CPPFLAGS="${CPPFLAGS:-} -I$sysroot/app/include"
+    # Older C library sources predate GCC 16's default C23 dialect.
+    # Append compatibility flags while preserving the SDK hardening options.
+    export CFLAGS="${CFLAGS:--O2 -g} -std=gnu17"
+    export CXXFLAGS="${CXXFLAGS:--O2 -g}"
+    export LDFLAGS="${LDFLAGS:-} -L$sysroot/app/lib/i386-linux-gnu -Wl,-rpath-link,$sysroot/app/lib/i386-linux-gnu"
+
+    auto() {
+        local name=$1
+        shift
+        mkdir "build-$name"
+        (
+            cd "build-$name"
+            # Supply glibc zero-size allocation results: malloc is non-NULL, realloc(ptr, 0) is NULL.
+            ac_cv_func_malloc_0_nonnull=yes xorg_cv_malloc0_returns_null=yes "$src/$name/configure" --prefix=/app --libdir=/app/lib/i386-linux-gnu \
+                --host=i686-linux-gnu --build="$(gcc -dumpmachine)" "$@"
+            make -j"$jobs"
+            make install DESTDIR="$sysroot"
+            # Libtool archives contain unstaged /app paths; shared libraries do not need them.
+            find "$sysroot/app/lib/i386-linux-gnu" -name '*.la' -delete
+        )
+    }
+    meson_build() {
+        local name=$1
+        shift
+        meson setup "build-$name" "$src/$name" --cross-file="$PWD/i386.ini" \
+            --prefix=/app --libdir=lib/i386-linux-gnu --wrap-mode=nodownload \
+            -Dauto_features=disabled "$@"
+        ninja -C "build-$name" -j"$jobs"
+        DESTDIR="$sysroot" ninja -C "build-$name" install
+    }
+
+    mkdir build-zlib
+    (
+        cd build-zlib
+        CHOST=i686-linux-gnu "$src/zlib/configure" --prefix=/app --libdir=/app/lib/i386-linux-gnu
+        make -j"$jobs"
+        make install DESTDIR="$sysroot"
+    )
+    auto expat --disable-static --without-docbook --without-examples --without-tests
+    auto libpng --disable-static
+    auto freetype --disable-static --without-bzip2 --without-brotli --without-harfbuzz
+    auto fontconfig --disable-static --disable-docs --disable-cache-build
+    auto gmp --disable-static --disable-cxx
+    auto nettle --disable-static --disable-documentation
+    auto libtasn1 --disable-static --disable-doc --disable-tools
+    auto gnutls --disable-static --disable-doc --disable-tools --disable-tests \
+        --disable-guile --without-p11-kit --without-idn --with-included-unistring \
+        --without-brotli --without-zstd \
+        --with-default-trust-store-dir=/etc/ssl/certs
+    auto libsndfile --disable-static --disable-external-libs --disable-mpeg \
+        --disable-programs --disable-examples --disable-regtest
+    auto alsa --disable-static
+    cmake -S "$src/jpeg" -B build-jpeg -G Ninja \
+        -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=i686 \
+        -DCMAKE_C_COMPILER=i686-linux-gnu-gcc -DCMAKE_SYSROOT="$sysroot" \
+        -DCMAKE_INSTALL_PREFIX=/app -DCMAKE_INSTALL_LIBDIR=lib/i386-linux-gnu \
+        -DENABLE_SHARED=ON -DENABLE_STATIC=OFF -DWITH_TURBOJPEG=OFF
+    ninja -C build-jpeg -j"$jobs"
+    DESTDIR="$sysroot" ninja -C build-jpeg install
+    meson_build v4l -Dv4l-utils=false -Dv4l-plugins=false -Dv4l-wrappers=false -Djpeg=enabled
+    meson_build pulse -Ddaemon=false -Dclient=true -Ddoxygen=false -Dman=false -Dtests=false
+
+    for name in Xau Xdmcp xcb X11 Xext Xrender Xfixes Xrandr Xcursor Xi Xinerama Xxf86vm Xcomposite; do
+        auto "$name" --disable-static --disable-devel-docs --without-doxygen \
+            --without-xmlto --without-fop
+    done
+    auto xshmfence --disable-static
+    meson_build pciaccess -Dzlib=enabled
+    meson_build drm -Dintel=enabled -Dnouveau=enabled -Dtests=false -Dman-pages=disabled
+    ln -s zstd-root/build/meson "$src/zstd"
+    meson_build zstd -Dbin_programs=false -Dbin_tests=false -Ddefault_library=shared
+    # ponytail: no LLVM; Intel/AMD use softpipe, add LLVM and their drivers for acceleration.
+    meson_build mesa -Dplatforms=x11 -Dgallium-drivers=nouveau,softpipe \
+        -Dvulkan-drivers=[] -Dllvm=disabled -Dglvnd=disabled -Dglx=dri \
+        -Degl=enabled -Dgbm=enabled -Dgles1=disabled -Dgles2=enabled \
+        -Dvideo-codecs=[] -Dbuild-tests=false
+
+    # Build the native portal helper with SDK libraries, then both V4L2 shims.
+    native_pkg="/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig"
+    mkdir -p /app/bin
+    gcc $native_cflags camera-portal.c $native_ldflags -o /app/bin/zalo-camera-portal \
+        $(PKG_CONFIG_LIBDIR="$native_pkg" PKG_CONFIG_SYSROOT_DIR= pkg-config --cflags --libs gio-unix-2.0)
+    env -u PKG_CONFIG_LIBDIR -u PKG_CONFIG_SYSROOT_DIR -u CPPFLAGS -u CFLAGS -u CXXFLAGS -u LDFLAGS \
+        meson setup build-pw-native "$src/pipewire" --prefix=/app \
+        -Dauto_features=disabled -Dpipewire-v4l2=enabled -Dpipewire-jack=disabled \
+        -Dsession-managers=[] -Dtests=disabled -Dexamples=disabled -Dflatpak=disabled
+    ninja -C build-pw-native -j"$jobs" pipewire-v4l2/src/libpw-v4l2.so
+    install -Dm755 build-pw-native/pipewire-v4l2/src/libpw-v4l2.so \
+        /app/pw-v4l2/lib/x86_64-linux-gnu/libpw-v4l2.so
+    # D-Bus/Camera permission runs in the native helper; PipeWire32 only uses its authorized FD.
+    meson_build pipewire -Dpipewire-v4l2=enabled -Dpipewire-jack=disabled -Ddbus=disabled \
+        -Dsession-managers=[] -Dtests=disabled -Dexamples=disabled -Dflatpak=disabled \
+        -Dlibv4l2-path=/app/pw-v4l2/lib/i386-linux-gnu
+    install -Dm755 "$sysroot/app/pw-v4l2/lib/i386-linux-gnu/libpw-v4l2.so" \
+        /app/pw-v4l2/lib/i386-linux-gnu/libpw-v4l2.so
+    # The locally built i386 glibc expands $LIB to lib.
+    ln -s i386-linux-gnu/libpw-v4l2.so /app/pw-v4l2/lib/libpw-v4l2.so
+
+    runtime=/app/lib/i386-linux-gnu
+    mkdir -p "$runtime"
+    cp -a "$sysroot/app/lib/i386-linux-gnu/." "$runtime/"
+    for directory in "$sysroot/usr/lib" "$sysroot/lib" /app/toolchain/i686-linux-gnu/lib; do
+        if test -d "$directory"; then
+            find "$directory" -maxdepth 1 -name '*.so*' -exec cp -a -t "$runtime" {} +
+        fi
+    done
+    for directory in etc share; do
+        if test -d "$sysroot/app/$directory"; then
+            mkdir -p "/app/$directory"
+            cp -a "$sysroot/app/$directory/." "/app/$directory/"
+        fi
+    done
+    # Link and load the same bundled i386 libraries the bridge will use.
+    cat > check.c <<'C'
+    #include <X11/Xlib.h>
+    #include <xcb/xcb.h>
+    #include <dlfcn.h>
+    #include <stdio.h>
+    void *symbols[] = { (void *)XOpenDisplay, (void *)xcb_connect };
+    int main(void) {
+        const char *libs[] = { "libGL.so.1", "libEGL.so.1", "libpulse.so.0",
+            "libasound.so.2", "libfontconfig.so.1", "libgnutls.so.30", "libv4l2.so.0" };
+        for (unsigned i = 0; i < sizeof(libs) / sizeof(libs[0]); i++) {
+            if (!dlopen(libs[i], RTLD_NOW)) {
+                fprintf(stderr, "%s: %s\n", libs[i], dlerror());
+                return 1;
+            }
+        }
+        return !symbols[0] || !symbols[1];
+    }
+    C
+    i686-linux-gnu-gcc $CPPFLAGS $LDFLAGS check.c -lX11 -lxcb -lXext -ldl -o check
+    readelf -h check | grep -q 'Class:.*ELF32'
+    "$runtime/ld-linux.so.2" --library-path "$runtime:$runtime/pulseaudio" ./check

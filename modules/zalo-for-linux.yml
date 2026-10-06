@@ -14,7 +14,7 @@ build-options:
     CARGO_NET_OFFLINE: 'true'
   arch:
     x86_64:
-      append-path: /usr/lib/sdk/mingw-w64/bin:/usr/lib/sdk/toolchain-i386/bin
+      append-path: /app/toolchain/bin
 
 sources:
   - type: git
@@ -39,20 +39,20 @@ sources:
     sha256: 8f8059620f92e5e1ad9423429e79c92e092b4fd33245ffb66c195a25994a97d7
     dest: temp
 
-  # ONNX Runtime for Linux (for ocr runtime)
-  - type: file
-    only-arches:
-      - x86_64
-    url: https://github.com/microsoft/onnxruntime/releases/download/v1.30.0/onnxruntime-linux-x64-1.30.0.tgz
-    sha256: a5ed5a3cac51fbb2e90da632ae43d19212faaa20e76484e62bcb7c23ddb3b3fd
-    dest: temp
+  # Native CPU OCR runtime, built from the v1.30.0 tag on both supported architectures.
+  - type: archive
+    url: https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.30.0.tar.gz
+    sha256: f6681ecbddf53898adf0cc9e8e9e84657485b84d2eca3c8aa353de6d7dd417ef
+    dest: flatpak-onnxruntime
 
+  # Pinned CPU dependency source archives, laid out as ORT's offline CMake mirror.
+  # Protoc is compiled from the matching Protobuf source, not downloaded as a binary.
+  - ../sources/onnxruntime-deps.json
+
+  # Produce temp/onnxruntime-linux-{x64,aarch64}-1.30.0.tgz before OCR preparation.
   - type: file
-    only-arches:
-      - aarch64
-    url: https://github.com/microsoft/onnxruntime/releases/download/v1.30.0/onnxruntime-linux-aarch64-1.30.0.tgz
-    sha256: e16a27a8ed330bbc698df7330b0cf56e722f354e3bcc92118682c74ef3c3e3da
-    dest: temp
+    path: ../scripts/setup-onnxruntime.sh
+    dest: flatpak
 
   - type: file
     path: ../com.zalo.linux.desktop
@@ -71,6 +71,7 @@ sources:
     dest: flatpak
 
 build-commands:
+  - sh ./flatpak/setup-onnxruntime.sh
   - chmod +x ./flatpak/setup-zalo-for-linux.sh
   - chmod +x ./flatpak/install-zalo-for-linux.sh
   - ./flatpak/setup-zalo-for-linux.sh

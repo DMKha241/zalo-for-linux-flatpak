@@ -6,7 +6,7 @@ npm ci --offline
 node -e '
 (async () => {
   await require("./scripts/prepare-app").main();
-  process.env.CC = "i686-unknown-linux-gnu-gcc";
+  if (process.arch === "x64") process.env.PATH = `/app/toolchain/bin:${process.env.PATH}`;
   await require("./scripts/setup-zcall-bridge").main();
 })().catch(error => {
   console.error(error);

@@ -10,30 +10,8 @@ sdk: org.freedesktop.Sdk
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.node22
   - org.freedesktop.Sdk.Extension.rust-stable
-  - org.freedesktop.Sdk.Extension.mingw-w64
-  - org.freedesktop.Sdk.Compat.i386
-  - org.freedesktop.Sdk.Extension.toolchain-i386
 
 command: zalo
-
-add-extensions:
-  org.freedesktop.Platform.Compat.i386:
-    directory: lib/i386-linux-gnu
-    version: '26.08'
-    no-autodownload: false
-    autodelete: false
-  org.freedesktop.Platform.GL32:
-    directory: lib/i386-linux-gnu/GL
-    version: '1.4'
-    versions: 26.08;26.08-extra;1.4
-    subdirectories: true
-    no-autodownload: true
-    autodelete: false
-    add-ld-path: lib
-    merge-dirs: vulkan/icd.d;glvnd/egl_vendor.d;egl/egl_external_platform.d;OpenCL/vendors;lib/dri;lib/d3d;lib/gbm;vulkan/explicit_layer.d;vulkan/implicit_layer.d;vdpau
-    download-if: active-gl-driver
-    enable-if: active-gl-driver
-    autoprune-unless: active-gl-driver
 
 finish-args:
     - --allow=multiarch
@@ -56,6 +34,9 @@ finish-args:
     - --talk-name=org.ayatana.indicator.application
 
 modules:
+  - modules/dependencies.yml
+  - modules/toolchain.yml
   - modules/7z.yml
   - modules/zalo-for-linux.yml
   - modules/wine.yml
+  - modules/cleanup.yml

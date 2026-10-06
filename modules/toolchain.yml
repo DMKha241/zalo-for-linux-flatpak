@@ -1,0 +1,174 @@
+# Build-only tools live under /app/toolchain and are removed before export.
+name: toolchain
+only-arches:
+- x86_64
+buildsystem: simple
+build-options:
+  append-path: /app/toolchain/bin
+build-commands:
+- bash setup-toolchain.sh
+- install -Dm755 setup-toolchain.sh /app/toolchain/setup-toolchain.sh
+sources:
+# Native assembler/linker tools for both Linux i686 and Windows i686 targets.
+- type: archive
+  url: https://ftp.gnu.org/gnu/binutils/binutils-2.47.tar.gz
+  sha256: 15f5abd0db9cf8ea116f516a9ce12bc1cefef491ef9e50942868093d8f92a6f3
+  dest: src/binutils
+# GCC bootstrap and MinGW compiler. The Linux compiler is completed after dependencies builds glibc32.
+- type: archive
+  url: https://ftp.gnu.org/gnu/gcc/gcc-16.2.0/gcc-16.2.0.tar.xz
+  sha256: e6738e29597f733270731aa90600f37ffdc045079dfc27ec7e8192cc81085c3e
+  dest: src/gcc
+# Native MPC library needed to build GCC; reuse the SDK native GMP/MPFR.
+- type: archive
+  url: https://ftp.gnu.org/gnu/mpc/mpc-1.4.1.tar.xz
+  sha256: 91204cd32f164bd3b7c992d4a6a8ce6519511aadab30f78b6982d0bf8d73e931
+  dest: src/mpc
+# Windows headers and CRT used to compile pipebridge.exe; no Linux runtime dependency.
+- type: archive
+  url: https://downloads.sourceforge.net/mingw-w64/mingw-w64-v14.0.0.tar.bz2
+  sha256: 6eaf921d9eb987d3820b364ea9775bc19b965ec81490b6fdd716526c28e1995c
+  dest: src/mingw
+# Native build helper to point Wine32 at the bundled loader; removed with the toolchain.
+- type: archive
+  url: https://github.com/NixOS/patchelf/releases/download/0.18.0/patchelf-0.18.0.tar.bz2
+  sha256: 1952b2a782ba576279c211ee942e341748fdb44997f704dd53def46cd055470b
+  dest: src/patchelf
+# Native Python generator dependency for Mesa; pure Python, build-only and removed before export.
+- type: archive
+  url: https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz
+  sha256: d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f
+  dest: src/pyyaml
+# Bootstrap compiler first; finish-linux runs after glibc32 is built by the dependency module.
+- type: inline
+  dest-filename: setup-toolchain.sh
+  contents: |+
+    #!/bin/bash
+    set -euo pipefail
+    src="$PWD/src"
+    prefix=/app/toolchain
+    jobs=${FLATPAK_BUILDER_N_JOBS:-2}
+    export PATH="$prefix/bin:$PATH"
+    sysroot="$prefix/sysroot"
+
+    if test "${1:-bootstrap}" = finish-linux; then
+      mkdir build-gcc-linux
+      cd build-gcc-linux
+      "$src/gcc/configure" --prefix="$prefix" --target=i686-linux-gnu \
+        --with-sysroot="$sysroot" --with-mpc="$prefix" --without-isl \
+        --enable-languages=c,c++ --enable-threads=posix --enable-shared \
+        --disable-bootstrap --disable-multilib --disable-nls \
+        --disable-libatomic --disable-libgomp --disable-libquadmath \
+        --disable-libssp --disable-libsanitizer --with-system-zlib
+      make -j"$jobs"
+      make install
+      cd ..
+
+      exit 0
+    fi
+
+    # Mesa uses PyYAML at build time; its optional libyaml extension is unnecessary.
+    PYYAML_FORCE_LIBYAML=0 python3 -m pip install --no-index --no-deps \
+      --no-build-isolation --prefix="$prefix" "$src/pyyaml"
+
+    mkdir build-mpc
+    cd build-mpc
+    "$src/mpc/configure" --prefix="$prefix" --disable-shared
+    make -j"$jobs"
+    make install
+    cd ..
+
+    mkdir build-binutils-linux
+    cd build-binutils-linux
+    "$src/binutils/configure" --prefix="$prefix" --target=i686-linux-gnu \
+      --with-sysroot="$sysroot" --disable-multilib --disable-nls \
+      --disable-werror --with-system-zlib
+    make -j"$jobs"
+    make install
+    cd ..
+
+    mkdir build-gcc-bootstrap
+    cd build-gcc-bootstrap
+    "$src/gcc/configure" --prefix="$prefix" --target=i686-linux-gnu \
+      --with-sysroot="$sysroot" --with-mpc="$prefix" --without-isl \
+      --enable-languages=c --with-newlib --without-headers \
+      --disable-bootstrap --disable-multilib --disable-nls \
+      --disable-shared --disable-threads --disable-libatomic \
+      --disable-libgomp --disable-libquadmath --disable-libssp \
+      --disable-libsanitizer --with-system-zlib
+    make -j"$jobs" all-gcc all-target-libgcc
+    make install-gcc install-target-libgcc
+    cd ..
+
+    # Keep one bin directory: explicit -m32 uses i686; native builds use SDK GCC.
+    cat > "$prefix/bin/gcc" <<'EOF'
+    #!/bin/sh
+    for arg in "$@"; do
+      if [ "$arg" = -m32 ]; then
+        exec /app/toolchain/bin/i686-linux-gnu-gcc \
+          -I/app/toolchain/sysroot/app/include \
+          -L/app/toolchain/sysroot/app/lib/i386-linux-gnu \
+          -Wl,-rpath-link,/app/toolchain/sysroot/app/lib/i386-linux-gnu "$@"
+      fi
+    done
+    exec /usr/bin/gcc "$@"
+    EOF
+    chmod +x "$prefix/bin/gcc"
+    printf 'int value;\n' | gcc -x c -c - -o check-native.o
+    readelf -h check-native.o | grep -q 'Class:.*ELF64'
+    printf 'int value;\n' | gcc -m32 -x c -c - -o check-i386.o
+    readelf -h check-i386.o | grep -q 'Class:.*ELF32'
+
+    mkdir build-binutils-mingw
+    cd build-binutils-mingw
+    "$src/binutils/configure" --prefix="$prefix" --target=i686-w64-mingw32 \
+      --disable-multilib --disable-nls --disable-werror --with-system-zlib
+    make -j"$jobs"
+    make install
+    cd ..
+
+    mkdir build-mingw-headers
+    cd build-mingw-headers
+    "$src/mingw/mingw-w64-headers/configure" \
+      --prefix="$prefix/i686-w64-mingw32" --host=i686-w64-mingw32 \
+      --enable-sdk=all --enable-secure-api
+    make install
+    cd ..
+
+    mkdir build-gcc-mingw
+    cd build-gcc-mingw
+    "$src/gcc/configure" --prefix="$prefix" --target=i686-w64-mingw32 \
+      --with-mpc="$prefix" --without-isl --with-system-zlib \
+      --enable-languages=c --enable-threads=win32 --disable-bootstrap \
+      --disable-multilib --disable-nls --disable-shared \
+      --disable-libatomic --disable-libgomp --disable-libquadmath \
+      --disable-libssp --disable-libsanitizer
+    make -j"$jobs" all-gcc
+    make install-gcc
+    cd ..
+
+    mkdir build-mingw-crt
+    cd build-mingw-crt
+    "$src/mingw/mingw-w64-crt/configure" \
+      --prefix="$prefix/i686-w64-mingw32" --host=i686-w64-mingw32 \
+      --disable-lib64 --enable-lib32
+    make -j"$jobs"
+    make install
+    cd ../build-gcc-mingw
+    make -j"$jobs" all-target-libgcc
+    make install-target-libgcc
+    cd ..
+
+    printf '#include <winsock2.h>\nint main(void) { WSADATA d; return WSAStartup(MAKEWORD(2,2), &d); }\n' > check-win.c
+    i686-w64-mingw32-gcc check-win.c -lws2_32 -o check.exe
+    objdump -f check.exe | grep -q 'file format pei-i386'
+
+    # Native helper for the bundled Wine loader path.
+    mkdir build-patchelf
+    cd build-patchelf
+    "$src/patchelf/configure" --prefix=/app/toolchain
+    make -j"$jobs"
+    make install
+    cd ..
+
+...
