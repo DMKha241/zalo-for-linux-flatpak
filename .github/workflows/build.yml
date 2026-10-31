@@ -16,6 +16,7 @@ jobs:
   build:
     outputs:
       zalo-version: ${{ steps.metadata.outputs.version }}
+      release-version: ${{ steps.metadata.outputs.release_version }}
     strategy:
       fail-fast: false
       matrix:
@@ -27,6 +28,9 @@ jobs:
             artifact-arch: aarch64
             runner: ubuntu-24.04-arm
     runs-on: ${{ matrix.runner }}
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-26.08
+      options: --privileged
     env:
       FLATPAK_ARCH: ${{ matrix.arch }}
       ARTIFACT_ARCH: ${{ matrix.artifact-arch }}
@@ -34,48 +38,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Flatpak builder
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y flatpak flatpak-builder jq
-          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-
-      - name: Determine artifact name
+      - name: Determine artifact name and tag from metainfo.xml
         id: metadata
         run: |
-          flatpak-builder --show-manifest net.vietnamlinuxfamily.zalo_for_linux.yml > .ci-resolved.json
-          version=$(jq -er '.modules[] | select(.name == "zalo-for-linux") | .sources[] | select((.url // "") | startswith("https://res-download-pc.zadn.vn/mac/ZaloSetup-universal-")) | .url | capture("ZaloSetup-universal-(?<version>[0-9]+\\.[0-9]+\\.[0-9]+)\\.dmg$").version' .ci-resolved.json)
-          commit=$(jq -er '.modules[] | select(.name == "zalo-for-linux") | .sources[] | select(.type == "git" and .url == "https://github.com/VN-Linux-Family/zalo-for-linux.git") | .commit[:7]' .ci-resolved.json)
-          artifact="Zalo-${version}-${commit}-${ARTIFACT_ARCH}.flatpak"
-          [[ "$artifact" =~ ^Zalo-[0-9]+\.[0-9]+\.[0-9]+-[0-9a-f]{7}-(x64|aarch64)\.flatpak$ ]]
-          echo "artifact=$artifact" >> "$GITHUB_OUTPUT"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+          full_version=$(python3 -c 'import xml.etree.ElementTree as ET; print(ET.parse("net.vietnamlinuxfamily.zalo_for_linux.metainfo.xml").find("./releases/release").attrib["version"])')
+          [[ -n "$full_version" && "$full_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z._-]+)?$ ]]
 
-      # Reuse build state, sources and compiler outputs; the manifest remains the source of truth.
-      - name: Restore Flatpak build cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            .flatpak-builder/cache
-            .flatpak-builder/downloads
-            .flatpak-builder/git
-            .flatpak-builder/ccache
-          key: flatpak-${{ matrix.arch }}-26.08-${{ hashFiles('net.vietnamlinuxfamily.zalo_for_linux.yml', 'modules/*.yml', 'scripts/*.sh', 'sources/*.json') }}
-          restore-keys: |
-            flatpak-${{ matrix.arch }}-26.08-
+          tag_version="${full_version%%-*}"
+          [[ "$tag_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          
+          artifact="Zalo-${full_version}-${ARTIFACT_ARCH}.flatpak"
+          echo "artifact=$artifact" >> "$GITHUB_OUTPUT"
+          echo "version=$tag_version" >> "$GITHUB_OUTPUT"
+          echo "release_version=$full_version" >> "$GITHUB_OUTPUT"
 
       - name: Build Flatpak
-        run: |
-          mkdir -p .flatpak-builder/ccache
-          printf 'max_size = 1GiB\n' > .flatpak-builder/ccache/ccache.conf
-          flatpak-builder --user --assumeyes --install-deps-from=flathub --force-clean --ccache --repo=repo dir net.vietnamlinuxfamily.zalo_for_linux.yml
-
-      - name: Export Flatpak bundle
-        env:
-          ARTIFACT: ${{ steps.metadata.outputs.artifact }}
-        run: |
-          flatpak build-bundle --arch="$FLATPAK_ARCH" --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo repo "$ARTIFACT" net.vietnamlinuxfamily.zalo-for-linux master
-          test -s "$ARTIFACT"
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: ${{ steps.metadata.outputs.artifact }}
+          manifest-path: net.vietnamlinuxfamily.zalo_for_linux.yml
+          arch: ${{ matrix.arch }}
+          branch: master
+          cache: true
+          cache-key: flatpak-${{ matrix.arch }}-${{ steps.metadata.outputs.release_version }}-${{ hashFiles('net.vietnamlinuxfamily.zalo_for_linux.yml', 'net.vietnamlinuxfamily.zalo_for_linux.metainfo.xml', 'modules/*.yml', 'scripts/*.sh', 'sources/*.json') }}
+          upload-artifact: false
 
       - uses: actions/upload-artifact@v4
         with:
@@ -86,7 +72,7 @@ jobs:
           retention-days: 30
 
   release:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-24.04
     permissions:
@@ -98,6 +84,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
       ZALO_VERSION: ${{ needs.build.outputs.zalo-version }}
+      RELEASE_VERSION: ${{ needs.build.outputs.release-version }}
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -112,16 +99,18 @@ jobs:
           for file in "${files[@]}"; do test -s "$file"; done
 
           if ! gh release view "$ZALO_VERSION" >/dev/null 2>&1; then
-            gh release create "$ZALO_VERSION" --target "$GITHUB_SHA" --title "Zalo $ZALO_VERSION" --notes "Flatpak builds for x64 and aarch64."
+            gh release create "$ZALO_VERSION" --target "$GITHUB_SHA" --title "Zalo $ZALO_VERSION" --notes "Release $RELEASE_VERSION (Flatpak builds for x64 and aarch64)."
+          else
+            gh release edit "$ZALO_VERSION" --target "$GITHUB_SHA" --title "Zalo $ZALO_VERSION" --notes "Release $RELEASE_VERSION (Flatpak builds for x64 and aarch64)."
           fi
+
           gh api "repos/$GH_REPO/releases/tags/$ZALO_VERSION" > release.json
           declare -A keep=()
           while IFS= read -r name; do
             [[ "$name" == Zalo-*.flatpak && "$name" != */* ]] || continue
             if [[ -f "dist/$name" ]]; then
-              # Same filename includes the same upstream commit and architecture.
               local_sha=$(sha256sum "dist/$name" | cut -d ' ' -f1)
-              digest=$(jq -r --arg name "$name" '.assets[] | select(.name == $name) | .digest // ""' release.json)
+              digest=$(jq -r --arg name "$name" '.assets[] \vert{} select(.name == $name) | .digest // ""' release.json)
               if [[ "$digest" != sha256:* ]]; then
                 mkdir -p previous
                 gh release download "$ZALO_VERSION" --pattern "$name" --dir previous
@@ -133,12 +122,3 @@ jobs:
                 continue
               fi
             fi
-            gh release delete-asset "$ZALO_VERSION" "$name" --yes
-          done < <(jq -r '.assets[].name' release.json)
-
-          for file in "${files[@]}"; do
-            name=${file##*/}
-            if [[ -z "${keep[$name]:-}" ]]; then
-              gh release upload "$ZALO_VERSION" "$file"
-            fi
-          done
