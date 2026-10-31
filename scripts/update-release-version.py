@@ -9,7 +9,7 @@ from pathlib import Path
 from xml.sax.saxutils import escape, quoteattr
 
 
-METainfo = Path("flatpak/io.github.DMKha241.zalo-for-linux.metainfo.xml")
+metainfo = Path("net.vietnamlinuxfamily.zalo_for_linux.metainfo.xml")
 
 
 def main() -> None:
@@ -17,7 +17,7 @@ def main() -> None:
     if not version:
         sys.exit("RELEASE_TAG must be set.")
 
-    contents = METainfo.read_text(encoding="utf-8")
+    contents = metainfo.read_text(encoding="utf-8")
     if re.search(rf"<release\s+version={re.escape(quoteattr(version))}", contents):
         print(f"Release {version} already exists; nothing to do.")
         return
@@ -34,9 +34,9 @@ def main() -> None:
         r"(?m)^(\s*<releases>)$", r"\1\n" + release.rstrip("\n"), contents, count=1
     )
     if count != 1:
-        sys.exit(f"Could not find <releases> opening tag in {METainfo}.")
+        sys.exit(f"Could not find <releases> opening tag in {metainfo}.")
 
-    METainfo.write_text(updated, encoding="utf-8")
+    metainfo.write_text(updated, encoding="utf-8")
     print(f"Added release {version} to releases.")
 
 

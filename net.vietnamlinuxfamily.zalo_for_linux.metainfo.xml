@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright 2026 VN-Linux-Family -->
+<!-- Copyright 2024 doandat943 -->
 <component type="desktop-application">
-    <id>net.vietnamlinuxfamily.zalo-for-linux</id>
+    <id>net.vietnamlinuxfamily.zalo_for_linux</id>
     <metadata_license>CC0-1.0</metadata_license>
     <project_license>MIT</project_license>
     <name>Zalo for Linux</name>
@@ -13,11 +13,11 @@
         <p>Unofficial port of Zalo messaging application for Linux systems.</p>
         <p>Contact the developers at developer@vietnamlinuxfamily.net.</p>
     </description>
-    <launchable type="desktop-id">net.vietnamlinuxfamily.zalo-for-linux.desktop</launchable>
+    <launchable type="desktop-id">net.vietnamlinuxfamily.zalo_for_linux.desktop</launchable>
     <categories>
         <category>Network</category>
     </categories>
-    <icon type="stock">net.vietnamlinuxfamily.zalo-for-linux</icon>
+    <icon type="stock">net.vietnamlinuxfamily.zalo_for_linux</icon>
     <url type="homepage">https://github.com/VN-Linux-Family/zalo-for-linux</url>
     <url type="bugtracker">https://github.com/VN-Linux-Family/zalo-for-linux/issues</url>
     <url type="vcs-browser">https://github.com/VN-Linux-Family/zalo-for-linux</url>
@@ -32,11 +32,6 @@
         <control>pointing</control>
     </requires>
     <releases>
-        <release version="26.10.10" date="2026-10-02">
-            <description>
-                <p>Update to 26.10.10</p>
-            </description>
-        </release>
         <release version="1.0.0" date="2026-07-31">
             <description>
                 <p>Update to 1.0.0</p>

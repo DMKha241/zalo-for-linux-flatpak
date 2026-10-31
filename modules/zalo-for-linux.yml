@@ -18,8 +18,13 @@ build-options:
 
 sources:
   - type: git
-    url: https://github.com/DMKha241/zalo-for-linux.git
-    commit: a2c6e01e8ad3aa136dc7eb51704762647966637a
+    url: https://github.com/VN-Linux-Family/zalo-for-linux.git
+    commit: 12ef36d227e450f4271d26d0b189e64203726e20
+    x-checker-data:
+      type: json
+      url: https://api.github.com/repos/VN-Linux-Family/zalo-for-linux/commits?sha=main&per_page=1
+      commit-query: .[0].sha
+      timestamp-query: .[0].commit.committer.date
 
   # Node & cargo cache
   - ../sources/node_modules.json
@@ -28,15 +33,25 @@ sources:
 
   # Zalo macOS setup file
   - type: file
-    url: https://res-download-pc.zadn.vn/mac/ZaloSetup-universal-26.10.10.dmg
-    sha256: 04052d973fc1fe0028b5e192cbe727bd0f7c51c8d1434574f91da8761508afce
+    url: https://res-download-pc.zadn.vn/mac/ZaloSetup-universal-26.10.20.dmg
+    sha256: a45d30b7f7b060f76b87722ef419b8f41d23a2913cdef084dcb0955dde8d85a0
     dest: temp
+    x-checker-data:
+      type: json
+      url: https://formulae.brew.sh/api/cask/zalo.json
+      version-query: .version
+      url-query: .url
 
   # Zalo Windows setup file (for ocr models and call)
   - type: file
-    url: https://res-download-pc.zadn.vn/win/ZaloSetup-26.10.10.exe
-    sha256: 8f8059620f92e5e1ad9423429e79c92e092b4fd33245ffb66c195a25994a97d7
+    url: https://res-download-pc.zadn.vn/win/ZaloSetup-26.10.20.exe
+    sha256: 8f2ee2c549c2b99e5acbe6af0063856a6b412331b23c23a5b8f2601ac20f99b7
     dest: temp
+    x-checker-data:
+      type: json
+      url: https://formulae.brew.sh/api/cask/zalo.json
+      version-query: .version
+      url-query: '"https://res-download-pc.zadn.vn/win/ZaloSetup-" + $version + ".exe"'
 
   # Native CPU OCR runtime (ONNX Runtime 1.30.0)
   - type: archive
@@ -55,11 +70,11 @@ sources:
     dest: flatpak
 
   - type: file
-    path: ../net.vietnamlinuxfamily.zalo-for-linux.desktop
+    path: ../net.vietnamlinuxfamily.zalo_for_linux.desktop
     dest: flatpak
 
   - type: file
-    path: ../net.vietnamlinuxfamily.zalo-for-linux.metainfo.xml
+    path: ../net.vietnamlinuxfamily.zalo_for_linux.metainfo.xml
     dest: flatpak
 
   - type: file
