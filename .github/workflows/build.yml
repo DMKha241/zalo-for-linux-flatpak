@@ -110,7 +110,7 @@ jobs:
             [[ "$name" == Zalo-*.flatpak && "$name" != */* ]] || continue
             if [[ -f "dist/$name" ]]; then
               local_sha=$(sha256sum "dist/$name" | cut -d ' ' -f1)
-              digest=$(jq -r --arg name "$name" '.assets[] \vert{} select(.name == $name) | .digest // ""' release.json)
+              digest=$(jq -r --arg name "$name" '.assets[] | select(.name == $name) | .digest // ""' release.json)
               if [[ "$digest" != sha256:* ]]; then
                 mkdir -p previous
                 gh release download "$ZALO_VERSION" --pattern "$name" --dir previous
@@ -122,3 +122,12 @@ jobs:
                 continue
               fi
             fi
+            gh release delete-asset "$ZALO_VERSION" "$name" --yes
+          done < <(jq -r '.assets[].name // empty' release.json)
+
+          for file in "${files[@]}"; do
+            name=$(basename "$file")
+            if [[ -z "${keep[$name]:-}" ]]; then
+              gh release upload "$ZALO_VERSION" "$file" --clobber
+            fi
+          done
