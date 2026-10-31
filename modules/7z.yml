@@ -10,7 +10,6 @@ sources:
     strip-components: 0
   - type: file
     path: ../scripts/build-logger.sh
-    dest: build-logger.sh
 
 build-commands:
   # GCC 16 diagnoses COM refcounting casts; retain the warning instead of failing -Werror.
