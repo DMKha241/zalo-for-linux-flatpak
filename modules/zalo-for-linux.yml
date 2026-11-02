@@ -12,9 +12,6 @@ build-options:
     ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
     CARGO_HOME: /run/build/zalo-for-linux/cargo
     CARGO_NET_OFFLINE: 'true'
-  arch:
-    x86_64:
-      append-path: /app/toolchain/bin
 
 sources:
   - type: git

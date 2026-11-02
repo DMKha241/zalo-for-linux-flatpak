@@ -12,6 +12,7 @@ cp -a "dist/$ELECTRON_OUTPUT_DIR/." /app/lib/zalo/
 install -Dm0755 /dev/stdin /app/bin/zalo <<'EOF'
 #!/bin/sh
 export SNI_ID="net.vietnamlinuxfamily.zalo_for_linux"
+export TMPDIR="${XDG_RUNTIME_DIR}/app/${FLATPAK_ID}"
 exec env DESKTOPINTEGRATION=1 zypak-wrapper.sh /app/lib/zalo/zalo "$@"
 EOF
 
