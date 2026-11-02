@@ -16,7 +16,7 @@ build-options:
 sources:
   - type: git
     url: https://github.com/VN-Linux-Family/zalo-for-linux.git
-    commit: eeb672729c32cd54d9e014ea39fb7e5bd53ff9a8
+    commit: 5524aa56165f3f26b812b4c264e58b5a0b27de2c
     x-checker-data:
       type: json
       url: 
@@ -31,8 +31,8 @@ sources:
 
   # Zalo macOS setup file
   - type: file
-    url: https://res-download-pc.zadn.vn/mac/ZaloSetup-universal-26.10.20.dmg
-    sha256: a45d30b7f7b060f76b87722ef419b8f41d23a2913cdef084dcb0955dde8d85a0
+    url: https://res-download-pc.zadn.vn/mac/ZaloSetup-universal-26.11.10.dmg
+    sha256: eff7e9c887a1164ae078e919f950b5552ffc3d846f8a63bd12ce88171ba79092
     dest: temp
     x-checker-data:
       type: json
@@ -42,8 +42,8 @@ sources:
 
   # Zalo Windows setup file (for ocr models and call)
   - type: file
-    url: https://res-download-pc.zadn.vn/win/ZaloSetup-26.10.20.exe
-    sha256: 8f2ee2c549c2b99e5acbe6af0063856a6b412331b23c23a5b8f2601ac20f99b7
+    url: https://res-download-pc.zadn.vn/win/ZaloSetup-26.11.10.exe
+    sha256: 7166ea28925b3121369ffb25e87b4749a648f47a861272009dcb14094b5a5511
     dest: temp
     x-checker-data:
       type: json
