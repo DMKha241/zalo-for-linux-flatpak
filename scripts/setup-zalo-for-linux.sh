@@ -29,5 +29,9 @@ case "$(uname -m)" in
         ;;
 esac
 
-npx electron-builder --linux dir -c.electronDist=$ELECTRON_CACHE/electron-v22.3.27-linux-${ELECTRON_ARCH}.zip --config.extraMetadata.version=26.10.20
+ZALO_VERSION=$(node -p "JSON.parse(require('fs').readFileSync('app/package.json.bak', 'utf8')).version")
+
+npx electron-builder --linux dir \
+    -c.electronDist=$ELECTRON_CACHE/electron-v22.3.27-linux-${ELECTRON_ARCH}.zip \
+    --config.extraMetadata.version="$ZALO_VERSION"
 rm -f "dist/$ELECTRON_OUTPUT_DIR/resources/default_app.asar"

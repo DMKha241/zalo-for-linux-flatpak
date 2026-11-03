@@ -45,9 +45,9 @@ jobs:
         id: metadata
         run: |
           full_version=$(python3 -c 'import xml.etree.ElementTree as ET; print(ET.parse("net.vietnamlinuxfamily.zalo_for_linux.metainfo.xml").find("./releases/release").attrib["version"])')
-          [[ -n "$full_version" && "$full_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z._-]+)?$ ]]
+          [[ -n "$full_version" && "$full_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(.[0-9A-Za-z._-]+)?$ ]]
 
-          tag_version="${full_version%%-*}"
+          tag_version=$(echo "$full_version" | cut -d'.' -f1-3)
           [[ "$tag_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
           
           artifact="Zalo-${full_version}-${ARTIFACT_ARCH}.flatpak"

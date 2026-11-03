@@ -28,13 +28,13 @@ jobs:
           version=$(sed -nE 's#.*ZaloSetup-universal-([0-9]+\.[0-9]+\.[0-9]+)\.dmg.*#\1#p' modules/zalo-for-linux.yml | head -n1)
           test -n "$version"
           timestamp=$(date -u -d "$MERGED_AT" +%y%m%d%H%M%S)
-          RELEASE_TAG="${version}-${timestamp}" python3 scripts/update-release-version.py
+          RELEASE_TAG="${version}.${timestamp}" python3 scripts/update-release-version.py
 
           if ! git diff --quiet -- net.vietnamlinuxfamily.zalo_for_linux.metainfo.xml; then
             file=net.vietnamlinuxfamily.zalo_for_linux.metainfo.xml
             head=$(gh api "repos/${GITHUB_REPOSITORY}/commits/main" --jq .sha)
             jq -n --arg repo "$GITHUB_REPOSITORY" --arg head "$head" \
-              --arg message "Update AppStream metadata to ${version}-${timestamp}" \
+              --arg message "Update AppStream metadata to ${version}.${timestamp}" \
               --arg content_path "$file" --rawfile content "$file" '{
                 query: "mutation($input: CreateCommitOnBranchInput!) { createCommitOnBranch(input: $input) { commit { oid signature { isValid wasSignedByGitHub } } } }",
                 variables: {input: {

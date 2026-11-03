@@ -82,12 +82,17 @@ sources:
   - type: file
     path: ../scripts/install-zalo-for-linux.sh
     dest: flatpak
+  
+  - type: file
+    path: ../bin/zalo
+    dest: bin
 
 build-commands:
   - chmod +x ./flatpak/build-logger.sh
   - chmod +x ./flatpak/setup-onnxruntime.sh
-  - sh ./flatpak/setup-onnxruntime.sh
   - chmod +x ./flatpak/setup-zalo-for-linux.sh
   - chmod +x ./flatpak/install-zalo-for-linux.sh
+  
+  - ./flatpak/setup-onnxruntime.sh
   - ./flatpak/setup-zalo-for-linux.sh
   - ./flatpak/install-zalo-for-linux.sh

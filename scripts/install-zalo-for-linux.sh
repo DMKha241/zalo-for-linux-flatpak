@@ -9,12 +9,7 @@ case "$(uname -m)" in
 esac
 cp -a "dist/$ELECTRON_OUTPUT_DIR/." /app/lib/zalo/
 
-install -Dm0755 /dev/stdin /app/bin/zalo <<'EOF'
-#!/bin/sh
-export SNI_ID="net.vietnamlinuxfamily.zalo_for_linux"
-export TMPDIR="${XDG_RUNTIME_DIR}/app/${FLATPAK_ID}"
-exec env DESKTOPINTEGRATION=1 zypak-wrapper.sh /app/lib/zalo/zalo "$@"
-EOF
+install -Dm0755 bin/zalo /app/bin/zalo
 
 install -Dm0644 flatpak/net.vietnamlinuxfamily.zalo_for_linux.desktop /app/share/applications/net.vietnamlinuxfamily.zalo_for_linux.desktop
 

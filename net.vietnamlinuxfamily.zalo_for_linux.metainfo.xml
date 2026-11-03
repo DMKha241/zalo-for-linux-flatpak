@@ -26,20 +26,21 @@
         <keyword>chat</keyword>
         <keyword>messaging</keyword>
         <keyword>linux</keyword>
+        <keyword>flatpak</keyword>
     </keywords>
     <requires>
         <control>keyboard</control>
         <control>pointing</control>
     </requires>
     <releases>
-        <release version="26.10.20-261102083338" date="2026-11-02">
+        <release version="26.10.20.261102083338" date="2026-11-02">
             <description>
-                <p>Update to 26.10.20-261102083338</p>
+                <p>Update to 26.10.20.261102083338</p>
             </description>
         </release>
-        <release version="26.10.20-261031230700" date="2026-10-31">
+        <release version="26.10.20.261031230700" date="2026-10-31">
             <description>
-                <p>Update to 26.10.20-261031230700</p>
+                <p>Update to 26.10.20.261031230700</p>
             </description>
         </release>
         <release version="1.0.0" date="2026-07-31">
