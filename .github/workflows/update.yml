@@ -38,10 +38,10 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b "update/${{ steps.update.outputs.release_version }}"
+          git checkout -b "${{ steps.update.outputs.release_version }}"
           git add -A
           git commit -m "Update to ${{ steps.update.outputs.release_version }}"
-          git push -u origin "update/${{ steps.update.outputs.release_version }}"
+          git push -u origin "${{ steps.update.outputs.release_version }}"
 
   generate:
     needs: check
