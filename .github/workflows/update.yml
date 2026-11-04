@@ -59,31 +59,38 @@ jobs:
           path: upstream
 
       - name: Install Flatpak generators
+        shell: bash
         run: |
+          set -euo pipefail
+
           pipx install "git+https://github.com/flatpak/flatpak-builder-tools.git#subdirectory=node"
-          pipx install "git+https://github.com/flatpak/flatpak-builder-tools.git#subdirectory=cargo" --include-deps
 
-          CARGO_PYTHON="$HOME/.local/share/pipx/venvs/flatpak-cargo-generator/bin/python"
+          GENERATOR_DIR="$RUNNER_TEMP/cargo-generator"
+          VENV="$GENERATOR_DIR/venv"
 
-          "$CARGO_PYTHON" -c "from flatpak_cargo_generator.script import main; print('Cargo generator OK')"
+          mkdir -p "$GENERATOR_DIR"
 
-          mkdir -p "$HOME/.local/bin"
+          curl -fL https://raw.githubusercontent.com/flatpak/flatpak-builder-tools/master/cargo/flatpak-cargo-generator.py -o "$GENERATOR_DIR/flatpak-cargo-generator.py"
 
-          cat > "$HOME/.local/bin/flatpak-cargo-generator" <<EOF
-          #!$CARGO_PYTHON
-          import sys
-          from flatpak_cargo_generator.script import main
+          python3 -m venv "$VENV"
 
-          if __name__ == '__main__':
-            sys.argv[0] = sys.argv[0].removesuffix('.exe')
-            sys.exit(main())
+          "$VENV/bin/pip" install \
+            "aiohttp>=3.9.5,<4.0.0" \
+            "PyYAML>=6.0.2,<7.0.0" \
+            "tomlkit>=0.13.3,<1.0"
+
+          cat > "$GENERATOR_DIR/flatpak-cargo-generator" <<EOF
+          #!/bin/sh
+          exec "$VENV/bin/python" "$GENERATOR_DIR/flatpak-cargo-generator.py" "\$@"
           EOF
 
-          chmod +x "$HOME/.local/bin/flatpak-cargo-generator"
+          chmod +x "$GENERATOR_DIR/flatpak-cargo-generator"
+
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          echo "CARGO_GENERATOR=$GENERATOR_DIR/flatpak-cargo-generator" >> "$GITHUB_ENV"
 
           flatpak-node-generator -h
-          flatpak-cargo-generator -h
+          "$GENERATOR_DIR/flatpak-cargo-generator" -h
 
       - name: Generate flatpak sources
         run: |
