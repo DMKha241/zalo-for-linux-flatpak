@@ -58,6 +58,16 @@ jobs:
           ref: ${{ needs.check.outputs.upstream_commit }}
           path: upstream
 
+      - name: Install Flatpak generators
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip pipx
+
+          pipx install "git+https://github.com/flatpak/flatpak-builder-tools.git#subdirectory=node"
+          pipx install "git+https://github.com/flatpak/flatpak-builder-tools.git#subdirectory=cargo" --include-deps
+
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
       - name: Generate flatpak sources
         run: |
           rm -f sources/cargo-crates.json /sources/node_modules.json sources/gyp-node_modules
