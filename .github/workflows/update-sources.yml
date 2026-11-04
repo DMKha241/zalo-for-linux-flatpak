@@ -20,10 +20,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: docker://ghcr.io/flathub-infra/flatpak-external-data-checker:latest
+        env:
+          GIT_AUTHOR_NAME: Flatpak External Data Checker
+          GIT_COMMITTER_NAME: Flatpak External Data Checker
+          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          fetch-depth: 0
-      
-      - name: Upstream updates
-        uses: docker://ghcr.io/flathub-infra/flatpak-external-data-checker:latest
-        with:
-          args: --update net.vietnamlinuxfamily.zalo_for_linux.yml
+          args: --update --never-fork net.vietnamlinuxfamily.zalo_for_linux.yml
