@@ -59,7 +59,9 @@ jobs:
           path: upstream
 
       - name: Generate flatpak sources
-        run: bash scripts/generate-flatpak-sources.sh
+        run: |
+          rm -f sources/cargo-crates.json /sources/node_modules.json sources/gyp-node_modules
+          sh scripts/generate-flatpak-sources.sh upstream sources
 
       - name: Push generated sources
         run: |
