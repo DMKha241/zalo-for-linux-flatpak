@@ -33,6 +33,26 @@
         <control>pointing</control>
     </requires>
     <releases>
+    <release version="26.11.10.20261104171010" date="2026-11-04">
+      <description>
+        <ul>
+                  <li>feat(zcall): improve desktop portal screen sharing and fallback</li>
+                  <li>feat: auto start for flatpak</li>
+                  <li>feat(tray): dynamic show/hide toggle in context menu</li>
+                  <li>revert: feat(zcall): improve desktop portal screen sharing and fallback</li>
+                  <li>fix(zcall): spoof WAYLAND_DISPLAY to trigger PipeWire portal in Flatpak</li>
+                  <li>feat(zcall): add window selection menu for X11 screen sharing</li>
+                  <li>fix(zcall): prevent duplicate desktop portal popup on cancellation</li>
+                  <li>perf(patches): optimize regex scanning and build caching in platform patches</li>
+                  <li>perf(patches): optimize OCR UI regex scanning in patch-zocr-pc-dist.js</li>
+                  <li>perf(ci): cache build dependencies and downloads</li>
+                  <li>refactor(build): derive the ZaDark variant from the Original AppDir</li>
+                  <li>perf(build): tune AppImage compression per build environment</li>
+                  <li>add contributing.md</li>
+                  <li>relicense project under BSD-3-clause</li>
+                </ul>
+      </description>
+    </release>
         <release version="1.0.0" date="2026-11-04">
             <description>
                 <p>Update to 1.0.0</p>
