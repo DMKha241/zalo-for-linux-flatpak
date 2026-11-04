@@ -16,7 +16,7 @@ build-options:
 sources:
   - type: git
     url: https://github.com/VN-Linux-Family/zalo-for-linux.git
-    commit: 63bb20c8519bb27bab74b7d0e536243d4e74a51b
+    commit: 82bda913c2447545ff85b9dc3d74ae59947eb487
     x-checker-data:
       type: json
       url: https://api.github.com/repos/VN-Linux-Family/zalo-for-linux/commits?sha=main&per_page=1
@@ -50,6 +50,18 @@ sources:
       version-query: .version
       url-query: '"https://res-download-pc.zadn.vn/win/ZaloSetup-" + $version + ".exe"'
 
+  - type: file
+    path: ../net.vietnamlinuxfamily.zalo_for_linux.metainfo.xml
+    dest: flatpak
+    x-checker-data:
+      type: json
+      parent-id: zalo-for-linux-git
+      url: https://formulae.brew.sh/api/cask/zalo.json
+      version-query: .version + "." + (($parent.new // $$parent.current).timestamp
+        | strptime("%Y-%m-%dT%H:%M:%SZ") | strptime("%Y-%m-%dT%H:%M:%S"))
+      timestamp-query: ($parent.new // $parent.current).timestamp
+      is-main-source: true
+
   # Native CPU OCR runtime (ONNX Runtime 1.30.0)
   - type: archive
     url: https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.30.0.tar.gz
@@ -59,20 +71,15 @@ sources:
   - ../sources/onnxruntime-deps.json
 
   - type: file
-    path: ../scripts/setup-onnxruntime.sh
-    dest: flatpak
-
-  - type: file
     path: ../scripts/build-logger.sh
     dest: flatpak
 
   - type: file
-    path: ../net.vietnamlinuxfamily.zalo_for_linux.desktop
+    path: ../scripts/setup-onnxruntime.sh
     dest: flatpak
 
   - type: file
-    path: ../net.vietnamlinuxfamily.zalo_for_linux.metainfo.xml
-    dest: flatpak
+    path: ../scripts/verify-onnxruntime.py
 
   - type: file
     path: ../scripts/setup-zalo-for-linux.sh
@@ -81,7 +88,7 @@ sources:
   - type: file
     path: ../scripts/install-zalo-for-linux.sh
     dest: flatpak
-
+  
   - type: file
     path: ../bin/zalo
     dest: bin

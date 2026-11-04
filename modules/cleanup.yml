@@ -1,4 +1,3 @@
-# Run last: installers are extracted, native app packaging and Wine patching are complete.
 name: cleanup
 buildsystem: simple
 build-commands:

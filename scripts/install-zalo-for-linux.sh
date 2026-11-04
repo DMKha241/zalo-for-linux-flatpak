@@ -2,6 +2,7 @@
 set -eu
 
 install -d /app/lib/zalo
+
 case "$(uname -m)" in
     x86_64) ELECTRON_OUTPUT_DIR=linux-unpacked ;;
     aarch64) ELECTRON_OUTPUT_DIR=linux-arm64-unpacked ;;

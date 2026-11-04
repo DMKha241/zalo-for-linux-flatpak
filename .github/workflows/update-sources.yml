@@ -23,23 +23,7 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Check upstream updates
+      - name: Upstream updates
         uses: docker://ghcr.io/flathub-infra/flatpak-external-data-checker:latest
         with:
-          args: --update --edit-only net.vietnamlinuxfamily.zalo_for_linux.yml
-
-      - name: Create or update pull request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: bot/upstream-updates
-          delete-branch: true
-          commit-message: "chore: update upstream sources"
-          title: "chore: update upstream sources"
-          body: |
-            Automatically generated upstream source updates.
-
-            This PR is automatically updated when new upstream versions
-            are detected.
-          author: Flatpak External Data Checker <41898282+github-actions[bot]@users.noreply.github.com>
-          committer: Flatpak External Data Checker <41898282+github-actions[bot]@users.noreply.github.com>
+          args: --update net.vietnamlinuxfamily.zalo_for_linux.yml

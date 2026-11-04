@@ -13,7 +13,6 @@ node -e '
 });
 '
 
-
 case "$(uname -m)" in
     x86_64)
         ELECTRON_ARCH="x64"

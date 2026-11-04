@@ -2,8 +2,6 @@ name: 7z
 buildsystem: simple
 
 sources:
-  # Full console source includes DMG/NSIS support for extracting the Zalo installers.
-  # Use the native SDK compiler on both x86_64 and aarch64.
   - type: archive
     url: https://github.com/ip7z/7zip/releases/download/26.03/7z2603-src.tar.xz
     sha256: 9cbde5099c6deb73691b0579063da5827522ccbbcba3f0020fd04e8c8c16c0d4
@@ -12,6 +10,5 @@ sources:
     path: ../scripts/build-logger.sh
 
 build-commands:
-  # GCC 16 diagnoses COM refcounting casts; retain the warning instead of failing -Werror.
   - bash ./build-logger.sh 7z-build.log make -C CPP/7zip/Bundles/Alone2 -f ../../cmpl_gcc.mak -j${FLATPAK_BUILDER_N_JOBS} CXX_WARN_FLAGS=-Wno-error=array-bounds
   - install -Dm0755 CPP/7zip/Bundles/Alone2/b/g/7zz /app/bin/7z

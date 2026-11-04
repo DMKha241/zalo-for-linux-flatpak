@@ -33,27 +33,7 @@
         <control>pointing</control>
     </requires>
     <releases>
-        <release version="26.11.10.261104091039" date="2026-11-04">
-            <description>
-                <p>Update to 26.11.10.261104091039</p>
-            </description>
-        </release>
-        <release version="26.11.10.261103112846" date="2026-11-03">
-            <description>
-                <p>Update to 26.11.10.261103112846</p>
-            </description>
-        </release>
-        <release version="26.10.20.261102083338" date="2026-11-02">
-            <description>
-                <p>Update to 26.10.20.261102083338</p>
-            </description>
-        </release>
-        <release version="26.10.20.261031230700" date="2026-10-31">
-            <description>
-                <p>Update to 26.10.20.261031230700</p>
-            </description>
-        </release>
-        <release version="1.0.0" date="2026-07-31">
+        <release version="1.0.0" date="2026-11-04">
             <description>
                 <p>Update to 1.0.0</p>
             </description>
