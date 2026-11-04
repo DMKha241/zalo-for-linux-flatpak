@@ -60,28 +60,30 @@ jobs:
 
       - name: Install Flatpak generators
         run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-pip pipx
-
           pipx install "git+https://github.com/flatpak/flatpak-builder-tools.git#subdirectory=node"
           pipx install "git+https://github.com/flatpak/flatpak-builder-tools.git#subdirectory=cargo" --include-deps
 
-              mkdir -p "$HOME/.local/bin"
+          CARGO_PYTHON="$HOME/.local/share/pipx/venvs/flatpak-cargo-generator/bin/python"
 
-          cat > "$HOME/.local/bin/flatpak-cargo-generator" <<'EOF'
-          #!/usr/bin/python3
+          "$CARGO_PYTHON" -c "from flatpak_cargo_generator.script import main; print('Cargo generator OK')"
+
+          mkdir -p "$HOME/.local/bin"
+
+          cat > "$HOME/.local/bin/flatpak-cargo-generator" <<EOF
+          #!$CARGO_PYTHON
           import sys
           from flatpak_cargo_generator.script import main
 
           if __name__ == '__main__':
-              sys.argv[0] = sys.argv[0].removesuffix('.exe')
-              sys.exit(main())
+            sys.argv[0] = sys.argv[0].removesuffix('.exe')
+            sys.exit(main())
           EOF
 
           chmod +x "$HOME/.local/bin/flatpak-cargo-generator"
-
-
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+          flatpak-node-generator -h
+          flatpak-cargo-generator -h
 
       - name: Generate flatpak sources
         run: |
