@@ -1,0 +1,125 @@
+name: Check for updates
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: upstream-updates
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      has_update: ${{ steps.update.outputs.has_update }}
+      commit_changed: ${{ steps.update.outputs.commit_changed }}
+      version_changed: ${{ steps.update.outputs.version_changed }}
+      release_version: ${{ steps.update.outputs.release_version }}
+      upstream_version: ${{ steps.update.outputs.upstream_version }}
+      upstream_commit: ${{ steps.update.outputs.upstream_commit }}
+      current_commit: ${{ steps.update.outputs.current_commit }}
+      commit_messages: ${{ steps.update.outputs.commit_messages }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run update check
+        id: update
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python .github/scripts/update.py
+
+      - name: Push update branch
+        if: steps.update.outputs.has_update == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "update/${{ steps.update.outputs.release_version }}"
+          git add -A
+          git commit -m "Update to ${{ steps.update.outputs.release_version }}"
+          git push -u origin "update/${{ steps.update.outputs.release_version }}"
+
+  generate:
+    needs: check
+    if: needs.check.outputs.commit_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: "${{ needs.check.outputs.release_version }}"
+
+      - uses: actions/checkout@v4
+        with:
+          repository: VN-Linux-Family/zalo-for-linux
+          ref: ${{ needs.check.outputs.upstream_commit }}
+          path: upstream
+
+      - name: Generate flatpak sources
+        run: bash scripts/generate-flatpak-sources.sh
+
+      - name: Push generated sources
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "Generate flatpak sources" && git push
+
+  create-pr:
+    needs: [check, generate]
+    if: always() && needs.check.outputs.has_update == 'true' && needs.check.result == 'success' && (needs.generate.result == 'success' || needs.generate.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: "${{ needs.check.outputs.release_version }}"
+
+      - name: Prepare PR body
+        id: pr
+        run: |
+          BODY="Automated update"
+
+          if [ "${{ needs.check.outputs.version_changed }}" = "true" ]; then
+            BODY="${BODY}
+          Update Zalo to ${{ needs.check.outputs.upstream_version }}"
+          fi
+
+          if [ "${{ needs.check.outputs.commit_changed }}" = "true" ]; then
+            OLD="${{ needs.check.outputs.current_commit }}"
+            NEW="${{ needs.check.outputs.upstream_commit }}"
+            BODY="${BODY}
+          Commit update: ${OLD::7} → ${NEW::7}"
+          fi
+
+          MESSAGES="${{ needs.check.outputs.commit_messages }}"
+          if [ -n "$MESSAGES" ]; then
+            CHANGELOG=""
+            while IFS= read -r line; do
+              [ -n "$line" ] && CHANGELOG="${CHANGELOG}
+          - ${line}"
+            done <<< "$MESSAGES"
+            if [ -n "$CHANGELOG" ]; then
+              BODY="${BODY}
+
+          Changelog:${CHANGELOG}
+
+          Full changelog: [here](https://github.com/VN-Linux-Family/zalo-for-linux/compare/${{ needs.check.outputs.current_commit }}...${{ needs.check.outputs.upstream_commit }})"
+            fi
+          fi
+
+          {
+            echo "body<<EOF"
+            echo "$BODY"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: "${{ needs.check.outputs.release_version }}"
+          title: "Update to ${{ needs.check.outputs.release_version }}"
+          body: ${{ steps.pr.outputs.body }}
+          base: main
