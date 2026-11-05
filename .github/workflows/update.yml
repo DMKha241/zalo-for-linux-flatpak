@@ -150,9 +150,26 @@ jobs:
 
       - name: Create pull request
         if: steps.update.outputs.has_update == 'true'
-        uses: peter-evans/create-pull-request@v7
-        with:
-          branch: "${{ steps.update.outputs.release_version }}"
-          title: "Update to ${{ steps.update.outputs.release_version }}"
-          body: ${{ steps.pr.outputs.body }}
-          base: main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ steps.update.outputs.release_version }}
+          BODY: ${{ steps.pr.outputs.body }}
+        run: |
+          TITLE="Update to $BRANCH"
+
+          PR=$(gh pr list \
+            --head "$BRANCH" \
+            --base main \
+            --state open \
+            --json number \
+            --jq '.[0].number')
+
+          if [ -n "$PR" ]; then
+            gh pr edit "$PR" --title "$TITLE" --body "$BODY"
+          else
+            gh pr create \
+              --head "$BRANCH" \
+              --base main \
+              --title "$TITLE" \
+              --body "$BODY"
+          fi
