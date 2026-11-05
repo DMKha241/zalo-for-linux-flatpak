@@ -17,7 +17,18 @@ METAINFO_XML_PATH = Path("net.vietnamlinuxfamily.zalo_for_linux.metainfo.xml")
 
 GITHUB_API_BASE = f"https://api.github.com/repos/{UPSTREAM_REPO}"
 
-FILTERED_PREFIXES = ("ci", "chore", "merge", "test", "workflow")
+FILTERED_PREFIXES = ("ci", "chore", "merge", "test", "workflow", "documentation")
+
+def should_filter_commit(message):
+    message = message.lower()
+
+    if any(keyword in message for keyword in FILTERED_PREFIXES):
+        return True
+
+    first_line = message.splitlines()[0].strip()
+    prefix = first_line.split(":", 1)[0].strip()
+
+    return bool(re.search(r"\bdocs?\b", prefix))
 
 def github_api(endpoint):
     headers = {"User-Agent": "update-script", "Accept": "application/vnd.github+json"}
@@ -114,12 +125,13 @@ def main():
     if commit_changed:
         comparison = github_api(f"compare/{current_commit}...{upstream_commit}")
         for entry in comparison.get("commits", []):
-            first_line = entry["commit"]["message"].splitlines()[0].strip()
-            prefix = re.split(r"[:\s(\[/]", first_line, maxsplit=1)[0].lower()
-            if prefix.startswith(FILTERED_PREFIXES):
+            message = entry["commit"]["message"]
+            first_line = message.splitlines()[0].strip()
+
+            if not first_line or should_filter_commit(message):
                 continue
-            if first_line:
-                commit_messages.append(first_line)
+
+            commit_messages.append(first_line)
 
     meta_text = METAINFO_XML_PATH.read_text()
 
