@@ -101,7 +101,7 @@ def main():
             if not url_match:
                 continue
             download_url = url_match.group(1)
-            print(f"Downloading {filename}...")
+            print(f"Downloading {filename} and calculating SHA256...")
             new_hash = download_sha256(download_url)
             lines = yml_text.splitlines(keepends=True)
             result = []
@@ -147,8 +147,8 @@ def main():
         description_lines.append("<ul>")
         for msg in commit_messages:
             escaped = msg.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-            description_lines.append(f"          <li>{escaped}</li>")
-        description_lines.append("        </ul>")
+            description_lines.append(f"    <li>{escaped}</li>")
+        description_lines.append("</ul>")
 
     description_body = "\n        ".join(description_lines) if description_lines else "<p>Update</p>"
 
