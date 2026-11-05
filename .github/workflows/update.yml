@@ -113,7 +113,7 @@ jobs:
           UPSTREAM_COMMIT: ${{ steps.update.outputs.upstream_commit }}
           COMMIT_MESSAGES: ${{ steps.update.outputs.commit_messages }}
         run: |
-          BODY="Automated update"
+          BODY=""
 
           if [ "$VERSION_CHANGED" = "true" ]; then
             BODY="${BODY}
