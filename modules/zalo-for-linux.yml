@@ -35,10 +35,6 @@ sources:
     sha256: 7166ea28925b3121369ffb25e87b4749a648f47a861272009dcb14094b5a5511
     dest: temp
 
-  - type: file
-    path: ../net.vietnamlinuxfamily.zalo_for_linux.metainfo.xml
-    dest: flatpak
-
   # Native CPU OCR runtime (ONNX Runtime 1.30.0)
   - type: archive
     url: https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.30.0.tar.gz
@@ -69,6 +65,14 @@ sources:
   - type: file
     path: ../bin/zalo
     dest: bin
+
+  - type: file
+    path: ../net.vietnamlinuxfamily.zalo_for_linux.metainfo.xml
+    dest: flatpak
+
+  - type: file
+    path: ../net.vietnamlinuxfamily.zalo_for_linux.desktop
+    dest: flatpak
 
 build-commands:
   - chmod +x ./flatpak/build-logger.sh
