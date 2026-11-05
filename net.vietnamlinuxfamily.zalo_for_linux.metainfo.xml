@@ -33,6 +33,24 @@
         <control>pointing</control>
     </requires>
     <releases>
+    <release version="26.11.10.261105020745" date="2026-11-05">
+      <description>
+        <ul>
+            <li>feat(zcall): improve desktop portal screen sharing and fallback</li>
+            <li>feat: auto start for flatpak</li>
+            <li>feat(tray): dynamic show/hide toggle in context menu</li>
+            <li>revert: feat(zcall): improve desktop portal screen sharing and fallback</li>
+            <li>fix(zcall): spoof WAYLAND_DISPLAY to trigger PipeWire portal in Flatpak</li>
+            <li>feat(zcall): add window selection menu for X11 screen sharing</li>
+            <li>fix(zcall): prevent duplicate desktop portal popup on cancellation</li>
+            <li>perf(patches): optimize OCR UI regex scanning in patch-zocr-pc-dist.js</li>
+            <li>support home-manager</li>
+            <li>add contributing.md</li>
+            <li>relicense project under BSD-3-clause</li>
+            <li>fix(patch-zfile): use a mount point instead of hardcoded path in deep proxy path resolition for Actions compatible</li>
+        </ul>
+      </description>
+    </release>
         <release version="1.0.0" date="2026-11-04">
             <description>
                 <p>Update to 1.0.0</p>
