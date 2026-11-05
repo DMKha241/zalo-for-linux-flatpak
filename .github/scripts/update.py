@@ -137,7 +137,7 @@ def main():
 
     now = datetime.now(timezone.utc)
     release_tag = upstream_version if version_changed else current_version
-    release_version = f"{release_tag}.{now.strftime('%Y%m%d%H%M%S')}"
+    release_version = f"{release_tag}.{now.strftime('%y%m%d%H%M%S')}"
     release_date = now.strftime("%Y-%m-%d")
 
     description_lines = []
