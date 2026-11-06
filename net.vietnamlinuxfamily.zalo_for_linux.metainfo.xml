@@ -6,21 +6,27 @@
     <project_license>MIT</project_license>
     <name>Zalo for Linux</name>
     <summary>Zalo for Linux</summary>
+    
     <developer id="io.github">
         <name>VN-Linux-Family</name>
     </developer>
+    
     <description>
         <p>Unofficial port of Zalo messaging application for Linux systems.</p>
         <p>Contact the developers at developer@vietnamlinuxfamily.net.</p>
     </description>
+    
     <launchable type="desktop-id">net.vietnamlinuxfamily.zalo_for_linux.desktop</launchable>
+    
     <categories>
         <category>Network</category>
     </categories>
+
     <icon type="stock">net.vietnamlinuxfamily.zalo_for_linux</icon>
     <url type="homepage">https://github.com/VN-Linux-Family/zalo-for-linux</url>
     <url type="bugtracker">https://github.com/VN-Linux-Family/zalo-for-linux/issues</url>
     <url type="vcs-browser">https://github.com/VN-Linux-Family/zalo-for-linux</url>
+
     <keywords>
         <keyword>zalo</keyword>
         <keyword>chat</keyword>
@@ -28,10 +34,19 @@
         <keyword>linux</keyword>
         <keyword>flatpak</keyword>
     </keywords>
-    <requires>
-        <control>keyboard</control>
+
+    <recommends>
         <control>pointing</control>
-    </requires>
+        <control>keyboard</control>
+        <internet>any</internet>
+    </recommends>
+    
+    <content_rating type="oars-1.1">
+        <content_attribute id="social-chat">intense</content_attribute>
+        <content_attribute id="social-audio">intense</content_attribute>
+        <content_attribute id="money-purchasing">intense</content_attribute>
+    </content_rating>
+    
     <releases>
     <release version="26.11.10.261105020745" date="2026-11-05">
       <description>
@@ -50,6 +65,7 @@
             <li>fix(patch-zfile): use a mount point instead of hardcoded path in deep proxy path resolition for Actions compatible</li>
         </ul>
       </description>
+    
     </release>
         <release version="1.0.0" date="2026-11-04">
             <description>

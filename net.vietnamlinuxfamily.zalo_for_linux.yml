@@ -16,7 +16,6 @@ command: zalo
 finish-args:
     - --share=network
     - --share=ipc
-    - --device=dri
     - --device=all # Camera
     - --socket=x11 # Electron 22 need run with X11/Xwayland
     - --socket=pulseaudio
