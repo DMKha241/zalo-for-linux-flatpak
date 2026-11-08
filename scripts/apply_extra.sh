@@ -13,6 +13,8 @@ cp -a /app/lib/zalo/. "$ZALO_TEMP_DIR/zalo/"
 
 cd /app/lib/scripts
 
+export LD_LIBRARY_PATH="/app/extra/zalo${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+
 /app/extra/zalo/zalo -e '
 (async () => {
   await require("./extract").main();

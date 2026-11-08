@@ -70,7 +70,7 @@ sources:
     dest: flatpak
 
   # Zalo macOS setup file
-  - type: file
+  - type: extra-data
     url: https://res-download-pc.zadn.vn/mac/ZaloSetup-universal-26.11.10.dmg
     sha256: eff7e9c887a1164ae078e919f950b5552ffc3d846f8a63bd12ce88171ba79092
     size: 339743085
