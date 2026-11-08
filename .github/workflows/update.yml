@@ -84,10 +84,10 @@ jobs:
         if: steps.update.outputs.commit_changed == 'true'
         run: |
           rm -f sources/cargo-crates.json \
-                sources/node_modules.json \
-                sources/gyp-node_modules
+                sources/node_modules.json
 
           sh scripts/generate-flatpak-sources.sh upstream sources
+          rm -rf upstream
 
       - name: Push generated sources
         if: steps.update.outputs.commit_changed == 'true'
@@ -150,26 +150,10 @@ jobs:
 
       - name: Create pull request
         if: steps.update.outputs.has_update == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: ${{ steps.update.outputs.release_version }}
-          BODY: ${{ steps.pr.outputs.body }}
-        run: |
-          TITLE="Update to $BRANCH"
-
-          PR=$(gh pr list \
-            --head "$BRANCH" \
-            --base main \
-            --state open \
-            --json number \
-            --jq '.[0].number')
-
-          if [ -n "$PR" ]; then
-            gh pr edit "$PR" --title "$TITLE" --body "$BODY"
-          else
-            gh pr create \
-              --head "$BRANCH" \
-              --base main \
-              --title "$TITLE" \
-              --body "$BODY"
-          fi
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ steps.update.outputs.release_version }}
+          base: main
+          title: "Update to ${{ steps.update.outputs.release_version }}"
+          body: ${{ steps.pr.outputs.body }}

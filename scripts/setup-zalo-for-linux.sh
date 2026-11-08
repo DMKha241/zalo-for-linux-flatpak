@@ -5,8 +5,7 @@ npm ci --offline
 
 node -e '
 (async () => {
-  await require("./scripts/prepare-app").main();
-  await require("./scripts/clean-unused").main();
+  await require("./scripts/build-native").main();
 })().catch(error => {
   console.error(error);
   process.exitCode = 1;
@@ -28,9 +27,21 @@ case "$(uname -m)" in
         ;;
 esac
 
-ZALO_VERSION=$(node -p "JSON.parse(require('fs').readFileSync('app/package.json.bak', 'utf8')).version")
+node -e '
+const fs = require("fs");
+const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+if (!pkg.build) pkg.build = {};
+if (!pkg.build.files) pkg.build.files = [];
+if (!pkg.build.files.includes("node_modules/**/*")) {
+  pkg.build.files.push("node_modules/**/*");
+}
+fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");
+'
+
+ZALO_VERSION=$(sed -n 's/.*<release [^>]*version="\([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/p' flatpak/net.vietnamlinuxfamily.zalo_for_linux.metainfo.xml | head -n 1)
 
 npx electron-builder --linux dir \
     -c.electronDist=$ELECTRON_CACHE/electron-v22.3.27-linux-${ELECTRON_ARCH}.zip \
     --config.extraMetadata.version="$ZALO_VERSION"
+
 rm -f "dist/$ELECTRON_OUTPUT_DIR/resources/default_app.asar"

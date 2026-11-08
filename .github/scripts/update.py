@@ -39,16 +39,18 @@ def github_api(endpoint):
     with urllib.request.urlopen(req) as resp:
         return json.loads(resp.read())
 
-def download_sha256(url):
+def download_sha256_and_size(url):
     req = urllib.request.Request(url, headers={"User-Agent": "update-script"})
     h = hashlib.sha256()
+    total_size = 0
     with urllib.request.urlopen(req) as resp:
         while True:
             chunk = resp.read(1 << 20)
             if not chunk:
                 break
+            total_size += len(chunk)
             h.update(chunk)
-    return h.hexdigest()
+    return h.hexdigest(), total_size
 
 def set_output(key, value):
     gh_output = os.environ.get("GITHUB_OUTPUT")
@@ -101,8 +103,8 @@ def main():
             if not url_match:
                 continue
             download_url = url_match.group(1)
-            print(f"Downloading {filename} and calculating SHA256...")
-            new_hash = download_sha256(download_url)
+            print(f"Downloading {filename} and calculating SHA256 and size...")
+            new_hash, new_size = download_sha256_and_size(download_url)
             lines = yml_text.splitlines(keepends=True)
             result = []
             found_url = False
@@ -111,11 +113,16 @@ def main():
                     found_url = True
                     result.append(line)
                     continue
-                if found_url and "sha256:" in line:
-                    line = re.sub(r"[0-9a-f]{64}", new_hash, line)
-                    found_url = False
-                else:
-                    found_url = False
+                if found_url:
+                    if "sha256:" in line:
+                        line = re.sub(r"[0-9a-f]{64}", new_hash, line)
+                    elif "size:" in line:
+                        line = re.sub(r"size:.*", f"size: {new_size}", line)
+                    elif "filename:" in line:
+                        line = re.sub(r"filename:.*", f"filename: {filename}", line)
+                        found_url = False
+                    elif not line.strip() or line.lstrip().startswith("-"):
+                        found_url = False
                 result.append(line)
             yml_text = "".join(result)
 

@@ -11,6 +11,9 @@ onnx_source=flatpak-onnxruntime
 onnx_build="$onnx_source/_build"
 onnx_package="onnxruntime-linux-$onnx_arch-1.30.0"
 logger=./flatpak/build-logger.sh
+
+install -d /app/lib/prebuilt
+
 test "$(cat "$onnx_source/VERSION_NUMBER")" = 1.30.0
 
 # Upstream supports keeping diagnostics non-fatal with newer SDK compilers.
@@ -31,4 +34,4 @@ cp "$onnx_source/LICENSE" "$onnx_source/ThirdPartyNotices.txt" "$onnx_source/VER
 # Test
 test -f "temp/$onnx_package/lib/libonnxruntime.so"
 python3 verify-onnxruntime.py "temp/$onnx_package/lib/libonnxruntime.so" "1.30.0"
-tar -czf "temp/$onnx_package.tgz" -C temp "$onnx_package"
+tar -czf "/app/lib/prebuilt/$onnx_package.tgz" -C temp "$onnx_package"

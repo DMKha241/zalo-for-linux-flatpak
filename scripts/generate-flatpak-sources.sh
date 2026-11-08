@@ -40,18 +40,6 @@ copy_npm_files() {
 [ -f "$ROOT/package-lock.json" ] || { echo 'Missing root package-lock.json' >&2; exit 1; }
 copy_npm_files "$ROOT" "$WORK/npm"
 
-find "$ROOT/nativelibs" \( -type d \( -name node_modules -o -name target -o -name build -o -name .git \) -prune \) \
-    -o -type f -name binding.gyp -print > "$WORK/gyp.list"
-printf '%s\n' '{"lockfileVersion":3,"packages":{}}' > "$WORK/gyp/package-lock.json"
-printf '%s\n' '{}' > "$WORK/gyp/package.json"
-while IFS= read -r binding; do
-    addon=$(dirname -- "$binding")
-    [ -f "$addon/package-lock.json" ] || { echo "Missing $addon/package-lock.json" >&2; exit 1; }
-    dest="$WORK/gyp/${addon#"$ROOT/"}"
-    mkdir -p "$dest"
-    copy_npm_files "$addon" "$dest"
-done < "$WORK/gyp.list"
-
 find "$ROOT" \( -type d \( -name .git -o -name node_modules -o -name target -o -name dist -o -name build -o -name .flatpak-builder -o -path "$WORK" \) -prune \) \
     -o -type f -name Cargo.lock -print > "$WORK/cargo.list"
 [ -s "$WORK/cargo.list" ] || { echo 'No Cargo.lock found' >&2; exit 1; }
@@ -77,20 +65,11 @@ jq -s '
     flatpak-node-generator npm package-lock.json --no-xdg-layout --electron-node-headers \
         --output "$WORK/node_modules.json"
 )
-if [ -s "$WORK/gyp.list" ]; then
-    (
-        cd "$WORK/gyp"
-        flatpak-node-generator npm package-lock.json --no-xdg-layout --recursive \
-            --recursive-pattern 'nativelibs/*/package-lock.json' --output "$WORK/gyp-node_modules.json"
-    )
-else
-    printf '%s\n' '[]' > "$WORK/gyp-node_modules.json"
-fi
 
-for name in node_modules.json gyp-node_modules.json cargo-crates.json; do
+for name in node_modules.json cargo-crates.json; do
     jq -e 'type == "array"' "$WORK/$name" >/dev/null
 done
-for name in node_modules.json gyp-node_modules.json cargo-crates.json; do
+for name in node_modules.json cargo-crates.json; do
     mv -- "$WORK/$name" "$OUT/$name"
     printf 'Wrote %s\n' "$OUT/$name"
 done
