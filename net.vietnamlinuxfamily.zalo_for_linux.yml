@@ -32,4 +32,4 @@ finish-args:
 modules:
   - modules/7z.yml
   - modules/zalo-for-linux.yml
-  - modules/cleanup.yml
+

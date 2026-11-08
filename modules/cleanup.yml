@@ -1,4 +1,0 @@
-name: cleanup
-buildsystem: simple
-build-commands:
-  - rm -f /app/bin/7z
