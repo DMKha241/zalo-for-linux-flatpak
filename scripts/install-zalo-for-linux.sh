@@ -2,8 +2,7 @@
 set -eu
 
 install -d /app/lib/zalo
-install -d /app/lib/script
-install -d /app/lib/scrips/patches
+install -d /app/lib/scripts/patches
 install -d /app/lib/scripts/utils
 
 find native -type f -name '*.node' -exec install -Dm0755 {} /app/lib/prebuilt/ \;
@@ -22,6 +21,8 @@ case "$(uname -m)" in
 esac
 
 cp -a "dist/$ELECTRON_OUTPUT_DIR/." /app/lib/zalo/
+install -d /app/lib/node_modules
+cp -a node_modules/. /app/lib/node_modules/
 
 install -Dm0755 bin/zalo /app/bin/zalo
 install -Dm0755 flatpak/apply_extra.sh /app/bin/apply_extra

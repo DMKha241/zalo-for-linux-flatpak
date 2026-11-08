@@ -66,14 +66,14 @@ jobs:
           cache-key: flatpak-${{ matrix.arch }}-${{ steps.metadata.outputs.release_version }}-${{ hashFiles('net.vietnamlinuxfamily.zalo_for_linux.yml', 'net.vietnamlinuxfamily.zalo_for_linux.metainfo.xml', 'modules/*.yml', 'scripts/*.sh', 'sources/*.json') }}
           upload-artifact: false
 
-      - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/main'
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload Flatpak repository
+        uses: actions/upload-artifact@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: repo
-          keep_files: true
+          name: flatpak-repo-${{ matrix.arch }}
+          path: repo/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 1
 
       - uses: actions/upload-artifact@v4
         with:
@@ -143,3 +143,58 @@ jobs:
               gh release upload "$ZALO_VERSION" "$file" --clobber
             fi
           done
+    
+  publish:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-24.04
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-26.08
+      options: --privileged
+
+    steps:
+      - name: Download Flatpak repositories
+        uses: actions/download-artifact@v4
+        with:
+          pattern: flatpak-repo-*
+          path: repos
+          merge-multiple: false
+
+      - name: Merge OSTree repositories
+        run: |
+          set -euo pipefail
+
+          cp -a repos/flatpak-repo-x86_64 repo
+
+          ostree pull-local \
+            --repo=repo \
+            repos/flatpak-repo-aarch64
+
+          flatpak build-update-repo repo
+
+          echo "Merged repository size:"
+          du -sh repo
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: repo
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: publish
+    runs-on: ubuntu-24.04
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+    
