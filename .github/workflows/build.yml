@@ -62,8 +62,6 @@ jobs:
           manifest-path: net.vietnamlinuxfamily.zalo_for_linux.yml
           arch: ${{ matrix.arch }}
           branch: master
-          repository-name: zalo-repo
-          repository-url: https://DMKha241.github.io/zalo-for-linux-flatpak/repo/
           cache: true
           cache-key: flatpak-${{ matrix.arch }}-${{ steps.metadata.outputs.release_version }}-${{ hashFiles('net.vietnamlinuxfamily.zalo_for_linux.yml', 'net.vietnamlinuxfamily.zalo_for_linux.metainfo.xml', 'modules/*.yml', 'scripts/*.sh', 'sources/*.json') }}
           upload-artifact: false
