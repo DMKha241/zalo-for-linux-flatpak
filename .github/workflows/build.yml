@@ -160,15 +160,22 @@ jobs:
           path: repos
           merge-multiple: false
 
-      - name: Merge OSTree repositories
+      - name: Merge Flatpak repositories
+        shell: bash
         run: |
           set -euo pipefail
 
           cp -a repos/flatpak-repo-x86_64 repo
 
+          for r in repo repos/flatpak-repo-aarch64; do
+            mkdir -p "$r/refs/heads"
+            mkdir -p "$r/refs/remotes"
+            mkdir -p "$r/refs/mirrors"
+          done
+
           ostree pull-local \
             --repo=repo \
-            repos/flatpak-repo-aarch64
+          repos/flatpak-repo-aarch64
 
           flatpak build-update-repo repo
 
