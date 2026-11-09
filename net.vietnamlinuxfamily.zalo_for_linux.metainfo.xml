@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright 2024 doandat943 -->
+<!-- Copyright (c) 2024-now doandat943 and Việt Nam Linux Family -->
 <component type="desktop-application">
     <id>net.vietnamlinuxfamily.zalo_for_linux</id>
     <metadata_license>CC0-1.0</metadata_license>
-    <project_license>MIT</project_license>
+    <project_license>BSD-3-Clause</project_license>
     <name>Zalo for Linux</name>
     <summary>Zalo for Linux</summary>
     

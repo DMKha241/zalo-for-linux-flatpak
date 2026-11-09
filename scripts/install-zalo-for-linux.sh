@@ -6,11 +6,13 @@ install -d /app/lib/scripts/patches
 install -d /app/lib/scripts/utils
 
 find native -type f -name '*.node' -exec install -Dm0755 {} /app/lib/prebuilt/ \;
+find native/addons -type f -name '*.js' -exec install -Dm0755 {} /app/lib/prebuilt/ \;
 install -Dm0755 native/engines/zocr/target/release/zocr-host /app/lib/prebuilt/
 
 cp -a scripts/patches/. /app/lib/scripts/patches/
 cp -a scripts/utils/. /app/lib/scripts/utils/
 cp -a scripts/extract* /app/lib/scripts/
+install -Dm0644 scripts/download.js /app/lib/scripts/
 install -Dm0644 scripts/apply-patches.js /app/lib/scripts/
 install -Dm0644 scripts/clean-unused.js /app/lib/scripts/
 
@@ -21,6 +23,7 @@ case "$(uname -m)" in
 esac
 
 cp -a "dist/$ELECTRON_OUTPUT_DIR/." /app/lib/zalo/
+ln -s /app/extra/app /app/lib/zalo/app
 install -d /app/lib/node_modules
 cp -a node_modules/. /app/lib/node_modules/
 

@@ -2,19 +2,16 @@
 set -e
 
 export ZALO_TEMP_DIR="/app/extra"
-export ZALO_APP_DIR="/app/extra/zalo/app"
+export ZALO_APP_DIR="/app/extra/app"
 export ZALO_PREBUILT_DIR=/app/lib/prebuilt
 
-mkdir -p "$ZALO_TEMP_DIR/zalo"
-
 cp /app/lib/prebuilt/*.tgz "$ZALO_TEMP_DIR/"
-cp -a /app/lib/zalo/. "$ZALO_TEMP_DIR/zalo/"
 
-export LD_LIBRARY_PATH="/app/extra/zalo${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export LD_LIBRARY_PATH="/app/lib/zalo${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
-cd /app/extra/zalo
+cd /app/lib/zalo
 
-ELECTRON_RUN_AS_NODE=1 /app/extra/zalo/zalo -e '
+ELECTRON_RUN_AS_NODE=1 /app/lib/zalo/zalo -e '
 (async () => {
   await require("/app/lib/scripts/extract").main();
   await require("/app/lib/scripts/apply-patches").main();
@@ -25,4 +22,5 @@ ELECTRON_RUN_AS_NODE=1 /app/extra/zalo/zalo -e '
 });
 '
 
-rm -f /app/extra/*.dmg /app/extra/*.exe /app/extra/*.tgz
+rm -f /app/extra/*.dmg /app/extra/*.exe /app/extra/*.tgz /app/extra/*.7z
+rm -rf /app/extra/onnxruntime* /app/extra/Zalo*

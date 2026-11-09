@@ -2,8 +2,8 @@
 Type=Application
 Name=Zalo
 Comment=Unofficial port of Zalo messaging application for Linux systems (Flatpak).
-Icon=/app/extra/zalo/app/pc-dist/favicon-512x512.png
+Icon=net.vietnamlinuxfamily.zalo_for_linux
 Exec=zalo %U
 Terminal=false
 Categories=Network;
-StartupWMClass=Zalo
+StartupWMClass=net.vietnamlinuxfamily.zalo_for_linux

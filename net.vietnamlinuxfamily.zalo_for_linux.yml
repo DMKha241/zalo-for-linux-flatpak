@@ -20,6 +20,7 @@ finish-args:
     - --socket=x11 # Electron 22 need run with X11/Xwayland
     - --socket=pulseaudio
     - --filesystem=xdg-download
+    - --filesystem=xdg-pictures
     - --talk-name=org.freedesktop.Notifications
     - --talk-name=org.kde.StatusNotifierWatcher
     - --talk-name=org.kde.Spectacle

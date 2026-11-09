@@ -1,3 +1,3 @@
 #!/bin/sh
 
-exec env DESKTOPINTEGRATION=1 zypak-wrapper.sh /app/extra/zalo/zalo "$@"
+exec env DESKTOPINTEGRATION=1 zypak-wrapper.sh /app/lib/zalo/zalo "$@"
