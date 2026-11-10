@@ -48,6 +48,24 @@
     </content_rating>
     
     <releases>
+    <release version="26.11.10.261110012936" date="2026-11-10">
+      <description>
+        <ul>
+            <li>fix: load @electron/asar by dynamic import() insteal require()</li>
+            <li>fix: install zfile-linux.js from prebuilt shipping first</li>
+            <li>fix(zfile): allow empty disk info in Flatpak</li>
+            <li>fix: true arch when patch and install native addons</li>
+            <li>fix: add plugins path in app.asar</li>
+            <li>fix: avoid URL parsing when resolving ONNX Runtime archive filename</li>
+            <li>fix: load screenshot assets in app dir</li>
+            <li>style: fix missing semicolon and redundant function call</li>
+            <li>feat: add dedicated Developer Mode plugin</li>
+            <li>fix(packaging): keep native Rust sources out of the package</li>
+            <li>fix(build): strip native sources and non-Linux binaries before packaging</li>
+            <li>fix(build): make clean-unused runnable and sweep native junk before packaging</li>
+        </ul>
+      </description>
+    </release>
     <release version="26.11.10.261108145725" date="2026-11-08">
       <description>
         <p>Update</p>
