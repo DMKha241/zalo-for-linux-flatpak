@@ -25,17 +25,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python .github/scripts/update.py
 
-      - name: Push update branch
-        if: steps.update.outputs.has_update == 'true'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          git checkout -b "${{ steps.update.outputs.release_version }}"
-          git add -A
-          git commit -m "Update to ${{ steps.update.outputs.release_version }}"
-          git push -u origin "${{ steps.update.outputs.release_version }}"
-
       - name: Checkout upstream
         if: steps.update.outputs.commit_changed == 'true'
         uses: actions/checkout@v4
@@ -88,19 +77,6 @@ jobs:
 
           sh scripts/generate-flatpak-sources.sh upstream sources
           rm -rf upstream
-
-      - name: Push generated sources
-        if: steps.update.outputs.commit_changed == 'true'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          git add -A -- sources/
-
-          if ! git diff --cached --quiet; then
-            git commit -m "Generate flatpak sources"
-            git push
-          fi
 
       - name: Prepare PR body
         if: steps.update.outputs.has_update == 'true'
