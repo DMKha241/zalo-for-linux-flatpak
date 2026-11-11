@@ -48,6 +48,15 @@
     </content_rating>
     
     <releases>
+    <release version="26.11.10.261111144432" date="2026-11-11">
+      <description>
+        <ul>
+            <li>fix(build): clean only generated trees and move the zcall crate out of the packaged engine</li>
+            <li>refactor: extract ZaDark integration into a reusable script</li>
+            <li>fix(zadark): resolve the app version when ZALO_VERSION is unset; fix engine search paths</li>
+        </ul>
+      </description>
+    </release>
     <release version="26.11.10.261110012936" date="2026-11-10">
       <description>
         <ul>
