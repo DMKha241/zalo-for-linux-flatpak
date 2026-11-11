@@ -184,29 +184,16 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Download Flatpak repositories
+      - name: Download x86_64 Flatpak repository
         uses: actions/download-artifact@v4
         with:
-          pattern: flatpak-repo-*
-          path: repos
-          merge-multiple: false
+          name: flatpak-repo-x86_64
+          path: repo
 
-      - name: Merge Flatpak repositories
+      - name: Prepare x86_64 Flatpak repository
         shell: bash
         run: |
           set -euo pipefail
-
-          cp -a repos/flatpak-repo-x86_64 repo
-
-          for r in repo repos/flatpak-repo-aarch64; do
-            mkdir -p "$r/refs/heads"
-            mkdir -p "$r/refs/remotes"
-            mkdir -p "$r/refs/mirrors"
-          done
-
-          ostree pull-local \
-            --repo=repo \
-          repos/flatpak-repo-aarch64
 
           # Debug extensions are not needed by end users. Remove both the
           # app's debug symbols and any matching runtime debug extension.
@@ -217,11 +204,9 @@ jobs:
 
           flatpak build-update-repo --prune repo
 
-          # Verify that both application refs survived the multi-arch merge.
+          # GitHub Pages currently publishes the x86_64 remote only.
           refs=$(ostree refs --repo=repo)
-          for arch in x86_64 aarch64; do
-            grep -Fxq "app/net.vietnamlinuxfamily.zalo_for_linux/$arch/master" <<< "$refs"
-          done
+          grep -Fxq "app/net.vietnamlinuxfamily.zalo_for_linux/x86_64/master" <<< "$refs"
 
           # Verify that the merged repository is actually consumable by Flatpak.
           flatpak remote-add --user --no-gpg-verify zalo-pages-check repo
@@ -261,7 +246,7 @@ jobs:
                         <p>Add this repository, then install the application:</p>
                         <pre><code>flatpak remote-add --user --no-gpg-verify zalo https://dmkha241.github.io/zalo-for-linux-flatpak
           flatpak install --user zalo net.vietnamlinuxfamily.zalo_for_linux</code></pre>
-                        <p>Supported architectures: x86_64 and aarch64.</p>
+                        <p>Supported architecture on this repository: x86_64.</p>
                         <p><a href="https://github.com/DMKha241/zalo-for-linux-flatpak">Source and issue tracker</a></p>
                       </main>
                     </body>
