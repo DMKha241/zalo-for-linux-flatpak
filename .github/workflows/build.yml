@@ -195,6 +195,9 @@ jobs:
         run: |
           set -euo pipefail
 
+          # OSTree expects all refs namespaces to exist, including empty ones.
+          mkdir -p repo/refs/heads repo/refs/remotes repo/refs/mirrors
+
           # Debug extensions are not needed by end users. Remove both the
           # app's debug symbols and any matching runtime debug extension.
           ostree refs --repo=repo --delete \
