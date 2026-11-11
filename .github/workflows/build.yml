@@ -208,8 +208,10 @@ jobs:
             --repo=repo \
           repos/flatpak-repo-aarch64
 
-          # Debug extensions are not needed by end users and make the Pages
-          # artifact exceed GitHub Pages' 1 GB published-site limit.
+          # Debug extensions are not needed by end users. Remove both the
+          # app's debug symbols and any matching runtime debug extension.
+          ostree refs --repo=repo --delete \
+            app/net.vietnamlinuxfamily.zalo_for_linux.Debug
           ostree refs --repo=repo --delete \
             runtime/net.vietnamlinuxfamily.zalo_for_linux.Debug
 
