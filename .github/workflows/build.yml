@@ -62,9 +62,34 @@ jobs:
           manifest-path: net.vietnamlinuxfamily.zalo_for_linux.yml
           arch: ${{ matrix.arch }}
           branch: master
+          build-dir: build-dir-zalo
+          keep-build-dirs: false
           cache: true
-          cache-key: flatpak-${{ matrix.arch }}-${{ steps.metadata.outputs.release_version }}-${{ hashFiles('net.vietnamlinuxfamily.zalo_for_linux.yml', 'net.vietnamlinuxfamily.zalo_for_linux.metainfo.xml', 'modules/*.yml', 'scripts/*.sh', 'sources/*.json') }}
+          restore-cache: true
+          save-cache: true
+          cache-key: flatpak-${{ hashFiles('net.vietnamlinuxfamily.zalo_for_linux.yml', 'net.vietnamlinuxfamily.zalo_for_linux.metainfo.xml', 'modules/*.yml', 'scripts/*.sh', 'sources/*.json') }}
           upload-artifact: false
+
+      - name: Package local build cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          cache_archive="$RUNNER_TEMP/flatpak-build-cache-${FLATPAK_ARCH}.tar.gz"
+          test -d .flatpak-builder
+          tar -czf "$cache_archive" \
+            --exclude='*/.lock' \
+            --exclude='*/rofiles-*' \
+            .flatpak-builder
+          echo "Cache archive: $(du -h "$cache_archive" | cut -f1)"
+
+      - name: Upload downloadable build cache
+        uses: actions/upload-artifact@v4
+        with:
+          name: flatpak-build-cache-${{ matrix.arch }}
+          path: ${{ runner.temp }}/flatpak-build-cache-${{ matrix.arch }}.tar.gz
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
 
       - name: Upload Flatpak repository
         uses: actions/upload-artifact@v4
@@ -148,11 +173,17 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pages: read
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-26.08
       options: --privileged
 
     steps:
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
       - name: Download Flatpak repositories
         uses: actions/download-artifact@v4
         with:
@@ -180,7 +211,7 @@ jobs:
           # Debug extensions are not needed by end users and make the Pages
           # artifact exceed GitHub Pages' 1 GB published-site limit.
           ostree refs --repo=repo --delete \
-            runtime/net.vietnamlinuxfamily.zalo_for_linux.Debug/
+            runtime/net.vietnamlinuxfamily.zalo_for_linux.Debug
 
           flatpak build-update-repo --prune repo
 
@@ -250,6 +281,9 @@ jobs:
             echo "::error::Flatpak repository is ${repo_size} bytes; GitHub Pages supports at most 1 GB."
             exit 1
           fi
+
+      - name: Prepare Pages artifact
+        run: touch repo/.nojekyll
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
