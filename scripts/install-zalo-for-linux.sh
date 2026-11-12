@@ -9,9 +9,9 @@ find native -type f -name '*.node' -exec install -Dm0755 {} /app/lib/prebuilt/ \
 find native/addons -type f -name '*.js' -exec install -Dm0755 {} /app/lib/prebuilt/ \;
 install -Dm0755 native/engines/zocr/target/release/zocr-host /app/lib/prebuilt/
 
-cp -a scripts/patches/. /app/lib/scripts/patches/
-cp -a scripts/utils/. /app/lib/scripts/utils/
-cp -a scripts/extract* /app/lib/scripts/
+install -Dm0644 scripts/patches/* /app/lib/scripts/patches/
+install -Dm0644 scripts/utils/* /app/lib/scripts/utils/
+install -Dm0644 scripts/extract* /app/lib/scripts/
 install -Dm0644 scripts/download.js /app/lib/scripts/
 install -Dm0644 scripts/apply-patches.js /app/lib/scripts/
 install -Dm0644 scripts/clean-unused.js /app/lib/scripts/
@@ -22,10 +22,10 @@ case "$(uname -m)" in
     *) echo "Unsupported architecture: $(uname -m)" >&2; exit 1 ;;
 esac
 
-cp -a "dist/$ELECTRON_OUTPUT_DIR/." /app/lib/zalo/
+cp -r "dist/$ELECTRON_OUTPUT_DIR/." /app/lib/zalo/
 ln -s /app/extra/app /app/lib/zalo/app
 install -d /app/lib/node_modules
-cp -a node_modules/. /app/lib/node_modules/
+cp -r node_modules/. /app/lib/node_modules/
 
 install -Dm0755 bin/zalo /app/bin/zalo
 install -Dm0755 /usr/lib/sdk/node22/bin/node /app/bin/node

@@ -1,1 +1,25 @@
-/.flatpak-builder/
+# Flatpak builder working directories
+.flatpak-builder/
+build-dir/
+repo/
+
+# Flatpak generated bundles & archives
+*.flatpak
+*.tar.gz
+*.tar.xz
+
+# Extra downloads & temporary files
+node_modules/
+app/
+*.create
+
+# System & OS generated files
+.DS_Store
+Thumbs.db
+*~
+*.swp
+*.tmp
+
+# IDE / Editor files
+.vscode/
+.idea/
