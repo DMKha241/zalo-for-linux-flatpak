@@ -48,6 +48,13 @@
     </content_rating>
     
     <releases>
+    <release version="26.11.10.261112063501" date="2026-11-12">
+      <description>
+        <ul>
+            <li>perf: optimize patch memory usage and add RAM benchmark</li>
+        </ul>
+      </description>
+    </release>
     <release version="26.11.10.261111144432" date="2026-11-11">
       <description>
         <ul>
