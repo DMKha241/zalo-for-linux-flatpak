@@ -63,6 +63,17 @@
     </screenshots>
     
     <releases>
+    <release version="26.11.10.261112225405" date="2026-11-12">
+      <description>
+        <ul>
+            <li>fix(app): fix auto theme</li>
+            <li>refactor(offline): move storage and renderer handling into plugin via private IPC bridge, remove plugin path dependency and file copying during patching</li>
+            <li>fix(offline): restore local chat rendering without network access</li>
+            <li>fix: add delay before kde change theme</li>
+            <li>fix(offline): resolve Flatpak symlink paths and guard Linux codesign checks</li>
+        </ul>
+      </description>
+    </release>
     <release version="26.11.10.261112063501" date="2026-11-12">
       <description>
         <ul>
