@@ -46,6 +46,21 @@
         <content_attribute id="social-audio">intense</content_attribute>
         <content_attribute id="money-purchasing">intense</content_attribute>
     </content_rating>
+
+    <screenshots>
+      <screenshot type="default">
+        <image type="source">https://raw.githubusercontent.com/DMKha241/zalo-for-linux-flatpak/main/screenshots/zalo-login.png</image>
+        <caption>Zalo login window</caption>
+      </screenshot>
+      <screenshot>
+        <image type="source">https://raw.githubusercontent.com/DMKha241/zalo-for-linux-flatpak/main/screenshots/zalo.png</image>
+        <caption>Zalo main window</caption>
+      </screenshot>
+      <screenshot>
+        <image type="source">https://raw.githubusercontent.com/DMKha241/zalo-for-linux-flatpak/main/screenshots/zalo-advanced-settings.png</image>
+        <caption>Zalo advanced settings window</caption>
+      </screenshot>
+    </screenshots>
     
     <releases>
     <release version="26.11.10.261112063501" date="2026-11-12">
