@@ -6,6 +6,7 @@ sources:
     url: https://github.com/ip7z/7zip/releases/download/26.03/7z2603-src.tar.xz
     sha256: 9cbde5099c6deb73691b0579063da5827522ccbbcba3f0020fd04e8c8c16c0d4
     strip-components: 0
+
   - type: file
     path: ../scripts/build-logger.sh
 

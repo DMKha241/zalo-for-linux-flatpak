@@ -1,0 +1,26 @@
+name: onnxruntime
+buildsystem: simple
+
+sources:
+  # Native CPU OCR runtime (ONNX Runtime 1.30.0)
+  - type: archive
+    url: https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.30.0.tar.gz
+    sha256: f6681ecbddf53898adf0cc9e8e9e84657485b84d2eca3c8aa353de6d7dd417ef
+    dest: onnxruntime
+
+  - ../sources/onnxruntime-deps.json
+
+  - type: file
+    path: ../scripts/build-logger.sh
+
+  - type: file
+    path: ../scripts/setup-onnxruntime.sh
+
+  - type: file
+    path: ../scripts/verify-onnxruntime.py
+
+build-commands:
+  - chmod +x ./build-logger.sh
+  - chmod +x ./setup-onnxruntime.sh
+
+  - ./setup-onnxruntime.sh

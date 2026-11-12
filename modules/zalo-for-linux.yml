@@ -22,25 +22,6 @@ sources:
   - ../sources/node_modules.json
   - ../sources/cargo-crates.json
 
-  # Native CPU OCR runtime (ONNX Runtime 1.30.0)
-  - type: archive
-    url: https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.30.0.tar.gz
-    sha256: f6681ecbddf53898adf0cc9e8e9e84657485b84d2eca3c8aa353de6d7dd417ef
-    dest: flatpak-onnxruntime
-
-  - ../sources/onnxruntime-deps.json
-
-  - type: file
-    path: ../scripts/build-logger.sh
-    dest: flatpak
-
-  - type: file
-    path: ../scripts/setup-onnxruntime.sh
-    dest: flatpak
-
-  - type: file
-    path: ../scripts/verify-onnxruntime.py
-
   - type: file
     path: ../scripts/setup-zalo-for-linux.sh
     dest: flatpak
@@ -84,11 +65,8 @@ sources:
     filename: ZaloSetup-26.11.10.exe
 
 build-commands:
-  - chmod +x ./flatpak/build-logger.sh
-  - chmod +x ./flatpak/setup-onnxruntime.sh
   - chmod +x ./flatpak/setup-zalo-for-linux.sh
   - chmod +x ./flatpak/install-zalo-for-linux.sh
 
-  - ./flatpak/setup-onnxruntime.sh
   - ./flatpak/setup-zalo-for-linux.sh
   - ./flatpak/install-zalo-for-linux.sh

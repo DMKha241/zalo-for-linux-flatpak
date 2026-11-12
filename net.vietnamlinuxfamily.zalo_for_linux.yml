@@ -32,5 +32,6 @@ finish-args:
 
 modules:
   - modules/7z.yml
+  - modules/onnxruntime.yml
   - modules/zalo-for-linux.yml
 

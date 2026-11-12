@@ -11,7 +11,7 @@ export LD_LIBRARY_PATH="/app/lib/zalo${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
 cd /app/lib/zalo
 
-ELECTRON_RUN_AS_NODE=1 /app/lib/zalo/zalo -e '
+/app/bin/node -e '
 (async () => {
   await require("/app/lib/scripts/extract").main();
   await require("/app/lib/scripts/apply-patches").main();

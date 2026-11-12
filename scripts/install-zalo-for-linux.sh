@@ -28,6 +28,7 @@ install -d /app/lib/node_modules
 cp -a node_modules/. /app/lib/node_modules/
 
 install -Dm0755 bin/zalo /app/bin/zalo
+install -Dm0755 /usr/lib/sdk/node22/bin/node /app/bin/node
 install -Dm0755 flatpak/apply_extra.sh /app/bin/apply_extra
 
 install -Dm0644 flatpak/net.vietnamlinuxfamily.zalo_for_linux.desktop /app/share/applications/net.vietnamlinuxfamily.zalo_for_linux.desktop

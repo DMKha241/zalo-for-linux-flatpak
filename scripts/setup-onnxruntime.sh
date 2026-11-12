@@ -7,10 +7,10 @@ case "$(uname -m)" in
     *) echo "Unsupported ONNX Runtime architecture: $(uname -m)" >&2; exit 1 ;;
 esac
 
-onnx_source=flatpak-onnxruntime
+onnx_source=onnxruntime
 onnx_build="$onnx_source/_build"
 onnx_package="onnxruntime-linux-$onnx_arch-1.30.0"
-logger=./flatpak/build-logger.sh
+logger=./build-logger.sh
 
 install -d /app/lib/prebuilt
 
