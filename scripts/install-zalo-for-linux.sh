@@ -14,7 +14,7 @@ install -d /app/lib/scripts/utils
 install -d /app/lib/prebuilt
 
 install -d /app/share/applications
-install -d /app/share/icons/hicolor/512x512/apps
+install -d /app/share/icons/hicolor/scalable/apps/
 install -d /app/share/metainfo
 
 find native -type f -name '*.node' -print0 |
@@ -46,7 +46,7 @@ install -p -m0755 flatpak/apply_extra.sh /app/bin/apply_extra
 
 install -p -m0644 flatpak/net.vietnamlinuxfamily.zalo_for_linux.desktop /app/share/applications/net.vietnamlinuxfamily.zalo_for_linux.desktop
 
-ICON_PATH="flatpak/net.vietnamlinuxfamily.zalo_for_linux.png"
-install -p -m0644 "$ICON_PATH" /app/share/icons/hicolor/512x512/apps/net.vietnamlinuxfamily.zalo_for_linux.png
+ICON_PATH="flatpak/net.vietnamlinuxfamily.zalo_for_linux.svg"
+install -p -m0644 "$ICON_PATH" /app/share/icons/hicolor/scalable/apps/net.vietnamlinuxfamily.zalo_for_linux.svg
 
 install -p -m0644 flatpak/net.vietnamlinuxfamily.zalo_for_linux.metainfo.xml /app/share/metainfo/net.vietnamlinuxfamily.zalo_for_linux.metainfo.xml

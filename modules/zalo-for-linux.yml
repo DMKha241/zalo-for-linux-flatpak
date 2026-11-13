@@ -47,7 +47,7 @@ sources:
     dest: flatpak
 
   - type: file
-    path: ../net.vietnamlinuxfamily.zalo_for_linux.png
+    path: ../net.vietnamlinuxfamily.zalo_for_linux.svg
     dest: flatpak
 
   # Zalo macOS setup file
