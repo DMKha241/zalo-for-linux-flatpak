@@ -14,7 +14,7 @@ install -d /app/lib/scripts/utils
 install -d /app/lib/prebuilt
 
 install -d /app/share/applications
-install -d /app/share/icons/hicolor/scalable/apps/
+install -d /app/share/icons/hicolor/scalable/apps
 install -d /app/share/metainfo
 
 find native -type f -name '*.node' -print0 |
@@ -37,7 +37,7 @@ case "$(uname -m)" in
 esac
 
 copy_tree "dist/$ELECTRON_OUTPUT_DIR" /app/lib/zalo
-ln -s /app/extra/app /app/lib/zalo/app
+ln -s ../../extra/app /app/lib/zalo/app
 copy_tree node_modules /app/lib/node_modules
 
 install -p -m0755 bin/zalo /app/bin/zalo
