@@ -28,11 +28,28 @@ test "$(cat "$onnx_source/VERSION_NUMBER")" = 1.30.0
     -Donnxruntime_CMAKE_DEPS_MIRROR_DIR="$PWD/flatpak-onnx-deps"
 "$logger" onnxruntime-build.log cmake --build "$onnx_build" --target onnxruntime --parallel "${FLATPAK_BUILDER_N_JOBS:-2}"
 
-install -d "temp/$onnx_package/lib" "temp/$onnx_package/include"
-install -Dm0755 "$onnx_build"/libonnxruntime.so* "temp/$onnx_package/lib/"
-install -Dm0644 "$onnx_source"/include/onnxruntime/core/session/*.h "temp/$onnx_package/include/"
-install -Dm0644 "$onnx_source/LICENSE" "$onnx_source/ThirdPartyNotices.txt" "$onnx_source/VERSION_NUMBER" "temp/$onnx_package/"
-# Test
-test -f "temp/$onnx_package/lib/libonnxruntime.so"
-python3 verify-onnxruntime.py "temp/$onnx_package/lib/libonnxruntime.so" "1.30.0"
+onnx_lib_dir="temp/$onnx_package/lib"
+install -d "$onnx_lib_dir" "temp/$onnx_package/include"
+
+for library in "$onnx_build"/libonnxruntime.so*; do
+    library_name=${library##*/}
+    if [ -L "$library" ]; then
+        ln -sfn "$(readlink "$library")" "$onnx_lib_dir/$library_name"
+    elif [ -f "$library" ]; then
+        install -p -m0755 "$library" "$onnx_lib_dir/$library_name"
+    else
+        echo "Unexpected ONNX Runtime library entry: $library" >&2
+        exit 1
+    fi
+done
+
+install -p -m0644 "$onnx_source"/include/onnxruntime/core/session/*.h "temp/$onnx_package/include/"
+install -p -m0644 "$onnx_source/LICENSE" "$onnx_source/ThirdPartyNotices.txt" "$onnx_source/VERSION_NUMBER" "temp/$onnx_package/"
+
+test -f "$onnx_lib_dir/libonnxruntime.so"
+test -L "$onnx_lib_dir/libonnxruntime.so"
+test "$(readlink "$onnx_lib_dir/libonnxruntime.so")" = libonnxruntime.so.1
+test -L "$onnx_lib_dir/libonnxruntime.so.1"
+test "$(readlink "$onnx_lib_dir/libonnxruntime.so.1")" = libonnxruntime.so.1.30.0
+python3 verify-onnxruntime.py "$onnx_lib_dir/libonnxruntime.so" "1.30.0"
 tar -czf "/app/lib/prebuilt/$onnx_package.tgz" -C temp "$onnx_package"

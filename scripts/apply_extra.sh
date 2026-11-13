@@ -5,7 +5,7 @@ export ZALO_TEMP_DIR="/app/extra"
 export ZALO_APP_DIR="/app/extra/app"
 export ZALO_PREBUILT_DIR=/app/lib/prebuilt
 
-cp /app/lib/prebuilt/*.tgz "$ZALO_TEMP_DIR/"
+install -p -m0644 -t "$ZALO_TEMP_DIR" -- /app/lib/prebuilt/*.tgz
 
 export LD_LIBRARY_PATH="/app/lib/zalo${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 

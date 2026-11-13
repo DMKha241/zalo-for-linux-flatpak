@@ -34,7 +34,7 @@ mkdir -p "$WORK/npm" "$WORK/gyp" "$WORK/cargo"
 # Isolate lockfiles from installed node_modules without modifying the project.
 copy_npm_files() {
     for name in package.json package-lock.json .npmrc; do
-        if [ -f "$1/$name" ]; then cp -- "$1/$name" "$2/$name"; fi
+        if [ -f "$1/$name" ]; then install -p -m0644 "$1/$name" "$2/$name"; fi
     done
 }
 [ -f "$ROOT/package-lock.json" ] || { echo 'Missing root package-lock.json' >&2; exit 1; }
