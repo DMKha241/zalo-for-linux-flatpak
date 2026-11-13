@@ -10,6 +10,14 @@ sdk: org.freedesktop.Sdk
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.node22
   - org.freedesktop.Sdk.Extension.rust-stable
+  
+add-extensions:
+  net.vietnamlinuxfamily.zalo_for_linux.ZaDark:
+    directory: lib/zadark
+    bundle: false
+    autodelete: true
+    no-autodownload: true
+    version: stable
 
 command: zalo
 
@@ -21,6 +29,7 @@ finish-args:
     - --socket=pulseaudio
     - --filesystem=xdg-download
     - --filesystem=xdg-pictures
+    - --filesystem=xdg-config/kdeglobals:ro
     - --talk-name=org.freedesktop.Notifications
     - --talk-name=org.kde.StatusNotifierWatcher
     - --talk-name=org.kde.Spectacle
@@ -34,4 +43,5 @@ modules:
   - modules/7z.yml
   - modules/onnxruntime.yml
   - modules/zalo-for-linux.yml
+
 
