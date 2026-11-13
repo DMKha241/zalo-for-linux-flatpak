@@ -13,6 +13,10 @@ install -d /app/lib/scripts/patches
 install -d /app/lib/scripts/utils
 install -d /app/lib/prebuilt
 
+install -d /app/share/applications
+install -d /app/share/icons/hicolor/512x512/apps
+install -d /app/share/metainfo
+
 find native -type f -name '*.node' -print0 |
     xargs -0 -r install -p -m0755 -t /app/lib/prebuilt --
 find native/addons -type f -name '*.js' -print0 |
