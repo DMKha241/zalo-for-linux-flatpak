@@ -205,11 +205,19 @@ jobs:
           ostree refs --repo=repo --delete \
             runtime/net.vietnamlinuxfamily.zalo_for_linux.Debug
 
-          flatpak build-update-repo --prune repo
+          # Keep only commits directly referenced by current refs; do not
+          # retain their parent history, so Pages contains the latest version only.
+          flatpak build-update-repo --prune --prune-depth=0 repo
 
           # GitHub Pages currently publishes the x86_64 remote only.
+          app_ref=app/net.vietnamlinuxfamily.zalo_for_linux/x86_64/master
           refs=$(ostree refs --repo=repo)
-          grep -Fxq "app/net.vietnamlinuxfamily.zalo_for_linux/x86_64/master" <<< "$refs"
+          grep -Fxq "$app_ref" <<< "$refs"
+          commit_count=$(ostree log --repo=repo "$app_ref" | awk '/^commit / { count++ } END { print count+0 }')
+          if [[ "$commit_count" -ne 1 ]]; then
+            echo "::error::Expected only the latest app commit, found $commit_count commits."
+            exit 1
+          fi
 
           # Verify that the merged repository is actually consumable by Flatpak.
           flatpak remote-add --user --no-gpg-verify zalo-pages-check repo
