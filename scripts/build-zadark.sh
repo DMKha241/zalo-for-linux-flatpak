@@ -10,9 +10,8 @@ if [ ! -d "$ZADARK_DIR" ]; then
     exit 1
 fi
 
-HOME=$PWD node flatpak/yarn.js --cwd "$ZADARK_DIR" config --offline set yarn-offline-mirror "$PWD/flatpak-node/yarn-mirror"
-
-HOME=$PWD node flatpak/yarn.js --cwd "$ZADARK_DIR" --offline --frozen-lockfile --ignore-scripts
+export npm_config_yarn_offline_mirror="$PWD/flatpak-node/yarn-mirror"
+node flatpak/yarn.js --cwd "$ZADARK_DIR" --offline --frozen-lockfile --ignore-scripts
 
 echo "Building ZaDark PC assets with gulp..."
 (cd "$ZADARK_DIR" && ./node_modules/.bin/gulp build)
