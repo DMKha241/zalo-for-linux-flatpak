@@ -63,6 +63,13 @@
     </screenshots>
     
     <releases>
+    <release version="26.11.10.261113151413" date="2026-11-13">
+      <description>
+        <ul>
+            <li>add div close</li>
+        </ul>
+      </description>
+    </release>
     <release version="26.11.10.261112225405" date="2026-11-12">
       <description>
         <ul>

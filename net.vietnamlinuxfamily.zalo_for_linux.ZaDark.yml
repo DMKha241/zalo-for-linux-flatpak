@@ -1,0 +1,18 @@
+id: net.vietnamlinuxfamily.zalo_for_linux.ZaDark
+branch: master
+
+runtime: net.vietnamlinuxfamily.zalo_for_linux
+runtime-version: master
+sdk: org.freedesktop.Sdk//26.08
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.node22
+
+build-extension: true
+separate-locales: false
+appstream-compose: false
+
+build-options:
+  prefix: /app/lib/zadark
+
+modules:
+  - modules/zadark.yml

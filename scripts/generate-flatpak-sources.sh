@@ -66,6 +66,12 @@ jq -s '
         --output "$WORK/node_modules.json"
 )
 
+if [ -f "$ROOT/vendor/zadark/yarn.lock" ]; then
+    printf 'Generating ZaDark sources from %s...\n' "$ROOT/vendor/zadark/yarn.lock"
+    flatpak-node-generator yarn "$ROOT/vendor/zadark/yarn.lock" \
+        --output "$WORK/zadark-sources.json"
+fi
+
 for name in node_modules.json cargo-crates.json; do
     jq -e 'type == "array"' "$WORK/$name" >/dev/null
 done
@@ -73,3 +79,9 @@ for name in node_modules.json cargo-crates.json; do
     mv -- "$WORK/$name" "$OUT/$name"
     printf 'Wrote %s\n' "$OUT/$name"
 done
+
+if [ -f "$WORK/zadark-sources.json" ]; then
+    jq -e 'type == "array"' "$WORK/zadark-sources.json" >/dev/null
+    mv -- "$WORK/zadark-sources.json" "$OUT/zadark-sources.json"
+    printf 'Wrote %s\n' "$OUT/zadark-sources.json"
+fi

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import base64
 import hashlib
 import json
 import os
@@ -14,6 +15,8 @@ UPSTREAM_URL = f"https://github.com/{UPSTREAM_REPO}"
 
 FLATPAK_YML_PATH = Path("modules/zalo-for-linux.yml")
 METAINFO_XML_PATH = Path("net.vietnamlinuxfamily.zalo_for_linux.metainfo.xml")
+ZADARK_YML_PATH = Path("modules/zadark.yml")
+ZADARK_METAINFO_PATH = Path("net.vietnamlinuxfamily.zalo_for_linux.ZaDark.metainfo.xml")
 
 GITHUB_API_BASE = f"https://api.github.com/repos/{UPSTREAM_REPO}"
 
@@ -84,6 +87,30 @@ def main():
 
     if commit_changed:
         yml_text = yml_text.replace(current_commit, upstream_commit, 1)
+
+        if ZADARK_YML_PATH.exists():
+            zadark_text = ZADARK_YML_PATH.read_text()
+            zadark_text = re.sub(r"(commit:\s*)[0-9a-f]{7,40}", rf"\g<1>{upstream_commit}", zadark_text)
+
+            try:
+                zadark_pkg_data = github_api(f"contents/vendor/zadark/package.json?ref={upstream_commit}")
+                zadark_pkg = json.loads(base64.b64decode(zadark_pkg_data["content"]).decode("utf-8"))
+                zadark_ver = zadark_pkg.get("version")
+                if zadark_ver:
+                    zadark_text = re.sub(r"(tag:\s*['\"]?)[\d.]+", rf"\g<1>{zadark_ver}", zadark_text)
+                    zadark_text = re.sub(r"(ZADARK_VERSION:\s*['\"]?)[\d.]+", rf"\g<1>{zadark_ver}", zadark_text)
+
+                    if ZADARK_METAINFO_PATH.exists():
+                        zmeta = ZADARK_METAINFO_PATH.read_text()
+                        if f'version="{zadark_ver}"' not in zmeta:
+                            rel_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+                            entry = f'    <release version="{zadark_ver}" date="{rel_date}">\n      <description>\n        <p>ZaDark {zadark_ver}</p>\n      </description>\n    </release>'
+                            zmeta = zmeta.replace("<releases>", f"<releases>\n{entry}", 1)
+                            ZADARK_METAINFO_PATH.write_text(zmeta)
+            except Exception as e:
+                print(f"Notice: Could not query ZaDark submodule package.json: {e}")
+
+            ZADARK_YML_PATH.write_text(zadark_text)
 
     if version_changed:
         yml_lines = yml_text.splitlines(keepends=True)

@@ -1,0 +1,41 @@
+name: zadark
+buildsystem: simple
+builddir: true
+
+build-options:
+  append-path: /usr/lib/sdk/node22/bin
+  env:
+    XDG_CACHE_HOME: /run/build/zadark/flatpak-node/cache
+    ZADARK_VERSION: '26.3'
+
+sources:
+  - type: git
+    url: https://github.com/VN-Linux-Family/zalo-for-linux.git
+    commit: 890875a2157c1c86654a88b53e19912b95444f83
+
+  - type: file
+    url: https://github.com/yarnpkg/yarn/releases/download/v1.22.22/yarn-1.22.22.js
+    sha256: 1ba910c84256998c4bf4b925857c2693adebdc962a2e3075f4f8b67045f45105
+    dest: flatpak
+    dest-filename: yarn.js
+
+  - ../sources/zadark-sources.json
+
+  - type: file
+    path: ../scripts/build-zadark.sh
+    dest: flatpak
+
+  - type: file
+    path: ../scripts/install-zadark.sh
+    dest: flatpak
+
+  - type: file
+    path: ../net.vietnamlinuxfamily.zalo_for_linux.ZaDark.metainfo.xml
+    dest: flatpak
+
+build-commands:
+  - chmod +x ./flatpak/build-zadark.sh
+  - chmod +x ./flatpak/install-zadark.sh
+
+  - ./flatpak/build-zadark.sh
+  - ./flatpak/install-zadark.sh

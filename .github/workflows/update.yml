@@ -31,6 +31,7 @@ jobs:
         with:
           repository: VN-Linux-Family/zalo-for-linux
           ref: ${{ steps.update.outputs.upstream_commit }}
+          submodules: recursive
           path: upstream
 
       - name: Install Flatpak generators
@@ -73,7 +74,8 @@ jobs:
         if: steps.update.outputs.commit_changed == 'true'
         run: |
           rm -f sources/cargo-crates.json \
-                sources/node_modules.json
+                sources/node_modules.json \
+                sources/zadark-sources.json
 
           sh scripts/generate-flatpak-sources.sh upstream sources
           rm -rf upstream

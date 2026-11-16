@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="addon">
+  <id>net.vietnamlinuxfamily.zalo_for_linux.ZaDark</id>
+  <extends>net.vietnamlinuxfamily.zalo_for_linux</extends>
+  <name>ZaDark</name>
+  <summary>Dark theme and privacy extension for Zalo</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MPL-2.0</project_license>
+  <url type="homepage">https://zadark.com</url>
+  <url type="vcs-browser">https://github.com/quaric/zadark</url>
+  <developer id="com.zadark">
+    <name>Quaric</name>
+  </developer>
+  <description>
+    <p>ZaDark is an extension for Zalo providing a modern dark interface and privacy controls.</p>
+    <ul>
+      <li>Modern dark theme for main windows, chat views, and popup viewers.</li>
+      <li>Privacy controls: prevent sending 'typing' and 'seen' indicators.</li>
+      <li>Multi-language message translation support.</li>
+      <li>Customizable quick emoji reactions.</li>
+    </ul>
+  </description>
+  <releases>
+    <release version="26.3" date="2026-10-18">
+      <description>
+        <p>ZaDark 26.3 with support for Zalo PC 26.10+, improved reaction bar, and style persistence.</p>
+      </description>
+    </release>
+  </releases>
+</component>
