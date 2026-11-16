@@ -22,7 +22,7 @@ sources:
   - ../sources/zadark-sources.json
 
   - type: file
-    path: ../scripts/build-zadark.sh
+    path: ../scripts/setup-zadark.sh
     dest: flatpak
 
   - type: file
@@ -34,8 +34,8 @@ sources:
     dest: flatpak
 
 build-commands:
-  - chmod +x ./flatpak/build-zadark.sh
+  - chmod +x ./flatpak/setup-zadark.sh
   - chmod +x ./flatpak/install-zadark.sh
 
-  - ./flatpak/build-zadark.sh
+  - ./flatpak/setup-zadark.sh
   - ./flatpak/install-zadark.sh

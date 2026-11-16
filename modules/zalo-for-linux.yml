@@ -22,6 +22,9 @@ sources:
   - ../sources/node_modules.json
   - ../sources/cargo-crates.json
 
+  - type: patch
+    path: ../patches/0001-zadark-extension-asset-urls.patch
+
   - type: file
     path: ../scripts/setup-zalo-for-linux.sh
     dest: flatpak

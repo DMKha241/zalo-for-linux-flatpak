@@ -1,0 +1,72 @@
+--- a/plugins/zadark/index.js
++++ b/plugins/zadark/index.js
+@@ -2,6 +2,7 @@
+ 
+ const fs = require('fs');
+ const path = require('path');
++const { pathToFileURL } = require('url');
+ 
+ const RENDERER_SCRIPT = fs.readFileSync(path.join(__dirname, 'renderer.js'), 'utf8');
+ 
+@@ -59,7 +60,7 @@
+   // 2. Flatpak extension mount point (/app/lib/zadark)
+   if (isFlatpak()) {
+     const flatpakExtDir = '/app/lib/zadark';
+-    if (fs.existsSync(flatpakExtDir)) {
++    if (fs.existsSync(path.join(flatpakExtDir, 'js', 'zadark.min.js'))) {
+       return flatpakExtDir;
+     }
+     return null;
+@@ -94,7 +95,7 @@
+ 
+     try {
+       let cssContent = fs.readFileSync(fullCssPath, 'utf8');
+-      const fontUrlPrefix = ('file://' + path.join(zadarkDir, 'fonts') + '/').replace(/\\/g, '/');
++      const fontUrlPrefix = pathToFileURL(path.join(zadarkDir, 'fonts') + path.sep).href;
+       cssContent = cssContent.replace(/\.\.\/fonts\//g, fontUrlPrefix);
+       await win.webContents.insertCSS(cssContent);
+     } catch (e) {
+@@ -119,7 +120,11 @@
+     if (!fs.existsSync(fullScriptPath)) continue;
+ 
+     try {
+-      const scriptContent = fs.readFileSync(fullScriptPath, 'utf8');
++      let scriptContent = fs.readFileSync(fullScriptPath, 'utf8');
++      const assetUrlPrefix = pathToFileURL(zadarkDir + path.sep).href;
++      scriptContent = scriptContent
++        .replace(/(["'`])zadark\/css\//g, `$1${assetUrlPrefix}css/`)
++        .replace(/(["'`])zadark\/images\//g, `$1${assetUrlPrefix}images/`);
+       await win.webContents.executeJavaScript(scriptContent, true);
+     } catch (e) {
+       console.warn(`[ZaDark Plugin] Could not execute script ${relScript}:`, e.message);
+--- a/tests/plugins-zadark-flatpak.test.js
++++ b/tests/plugins-zadark-flatpak.test.js
+@@ -5,6 +5,7 @@
+ const fs = require('fs');
+ const os = require('os');
+ const path = require('path');
++const { pathToFileURL } = require('url');
+ 
+ const zadarkPlugin = require('../plugins/zadark');
+ 
+@@ -163,7 +164,7 @@
+       );
+       fs.writeFileSync(
+         path.join(tmpDir, 'js', 'zadark.min.js'),
+-        'window.__zadark = true;',
++        'window.__zadark = true; window.assetCss = "zadark/css/zadark.min.css"; window.assetImage = "zadark/images/zadark-lockup.svg";',
+         'utf8'
+       );
+ 
+@@ -187,6 +188,11 @@
+       assert.ok(jqIndex !== -1, 'jQuery script must be executed');
+       assert.ok(zadarkIndex !== -1, 'zadark script must be executed');
+       assert.ok(jqIndex < zadarkIndex, 'jQuery must execute before main zadark script');
++
++      const assetUrlPrefix = pathToFileURL(tmpDir + path.sep).href;
++      const zadarkScript = mockWin._executedScripts[zadarkIndex];
++      assert.ok(zadarkScript.includes(`${assetUrlPrefix}css/zadark.min.css`));
++      assert.ok(zadarkScript.includes(`${assetUrlPrefix}images/zadark-lockup.svg`));
+     });
+   });
+ 
