@@ -34,6 +34,8 @@ jobs:
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-26.08
       options: --privileged
+      volumes:
+        - /var/lib/flatpak
     env:
       FLATPAK_ARCH: ${{ matrix.arch }}
       ARTIFACT_ARCH: ${{ matrix.artifact-arch }}
