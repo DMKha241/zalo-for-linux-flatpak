@@ -81,13 +81,15 @@ jobs:
         shell: bash
         run: |
           flatpak remote-add --if-not-exists --no-gpg-verify local-build-repo repo
-          flatpak install --noninteractive --no-deps -y local-build-repo net.vietnamlinuxfamily.zalo_for_linux
+          flatpak install --noninteractive --no-deps -y local-build-repo net.vietnamlinuxfamily.zalo_for_linux//master
 
       - name: Build ZaDark Extension
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
           bundle: ${{ steps.metadata.outputs.zadark_artifact }}
           manifest-path: net.vietnamlinuxfamily.zalo_for_linux.ZaDark.yml
+          repository-name: local-build-repo
+          repository-url: https://dmkha241.github.io/zalo-for-linux-flatpak/zalo.flatpakrepo
           arch: ${{ matrix.arch }}
           branch: master
           build-dir: build-dir-zadark
