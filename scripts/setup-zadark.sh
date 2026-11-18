@@ -24,5 +24,5 @@ node scripts/prepare-zadark.js
 ASSETS_DIR="$ZADARK_DIR/build/pc/assets"
 
 if [ -f "$ASSETS_DIR/js/zadark-popup-viewer.min.js" ] && [ ! -f "$ASSETS_DIR/js/zadark-popup.min.js" ]; then
-    cp -p "$ASSETS_DIR/js/zadark-popup-viewer.min.js" "$ASSETS_DIR/js/zadark-popup.min.js"
+    install -p -m0644 "$ASSETS_DIR/js/zadark-popup-viewer.min.js" "$ASSETS_DIR/js/zadark-popup.min.js"
 fi

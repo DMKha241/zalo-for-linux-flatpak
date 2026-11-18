@@ -3,6 +3,9 @@ set -eu
 
 DEST_DIR="${FLATPAK_DEST:-/app/lib/zadark}"
 ASSETS_DIR="vendor/zadark/build/pc/assets"
+METADATA_DIR="$DEST_DIR/share/metainfo"
+ICON_DIR="$DEST_DIR/share/icons/hicolor/scalable/apps"
+ICON_PATH="flatpak/net.vietnamlinuxfamily.zalo_for_linux.svg"
 
 if [ ! -d "$ASSETS_DIR" ]; then
     echo "Error: Built assets directory $ASSETS_DIR not found!" >&2
@@ -17,7 +20,8 @@ copy_tree() {
 }
 
 copy_tree "$ASSETS_DIR" "$DEST_DIR"
-METADATA_DIR="$DEST_DIR/share/metainfo"
 install -d "$METADATA_DIR"
+install -d "$ICON_DIR"
+install -p -m0644 "$ICON_PATH" "$ICON_DIR/net.vietnamlinuxfamily.zalo_for_linux.ZaDark.svg"
 install -p -m0644 "flatpak/net.vietnamlinuxfamily.zalo_for_linux.ZaDark.metainfo.xml" "$METADATA_DIR/net.vietnamlinuxfamily.zalo_for_linux.ZaDark.metainfo.xml"
 

@@ -20,6 +20,10 @@ sources:
   - type: file
     path: ../scripts/install-zadark.sh
     dest: flatpak
+    
+  - type: file
+    path: ../net.vietnamlinuxfamily.zalo_for_linux.svg
+    dest: flatpak
 
   - type: file
     url: https://github.com/yarnpkg/yarn/releases/download/v1.22.22/yarn-1.22.22.js
