@@ -1,7 +1,7 @@
 id: net.vietnamlinuxfamily.zalo_for_linux.ZaDark
 
 runtime: net.vietnamlinuxfamily.zalo_for_linux
-runtime-version: master
+runtime-version: stable
 
 sdk: org.freedesktop.Sdk//26.08
 sdk-extensions:
