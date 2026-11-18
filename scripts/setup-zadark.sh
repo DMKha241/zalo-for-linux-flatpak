@@ -8,7 +8,11 @@ if [ ! -d "$ZADARK_DIR" ]; then
     exit 1
 fi
 
-export npm_config_yarn_offline_mirror="$PWD/flatpak-node/yarn-mirror"
+cat <<EOF > "$ZADARK_DIR/.yarnrc"
+yarn-offline-mirror "$PWD/flatpak-node/yarn-mirror"
+yarn-offline-mirror-pruning false
+EOF
+
 node flatpak/yarn.js --cwd "$ZADARK_DIR" --offline --frozen-lockfile --ignore-scripts
 
 "$ZADARK_DIR/node_modules/.bin/gulp" build --cwd "$ZADARK_DIR"

@@ -5,7 +5,7 @@ builddir: true
 build-options:
   append-path: /usr/lib/sdk/node22/bin
   env:
-    NPM_CONFIG_CACHE: /run/build/zadark-ext/flatpak-node/npm-cache
+    npm_config_yarn_offline_mirror: /run/build/zadark-ext/flatpak-node/yarn-mirror
     NPM_CONFIG_NODEDIR: /usr/lib/sdk/node22
 
 sources:
