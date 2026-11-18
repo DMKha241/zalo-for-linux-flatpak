@@ -21,6 +21,12 @@ sources:
     path: ../scripts/install-zadark.sh
     dest: flatpak
 
+  - type: file
+    url: https://github.com/yarnpkg/yarn/releases/download/v1.22.22/yarn-1.22.22.js
+    sha256: 1ba910c84256998c4bf4b925857c2693adebdc962a2e3075f4f8b67045f45105
+    dest: flatpak
+    dest-filename: yarn.js
+
   # Node cache
   - ../sources/zadark/node_modules.json
   
