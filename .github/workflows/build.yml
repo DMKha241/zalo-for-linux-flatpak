@@ -81,7 +81,7 @@ jobs:
         shell: bash
         run: |
           flatpak remote-add --if-not-exists --no-gpg-verify local-build-repo repo
-          flatpak install --noninteractive --no-deps -y local-build-repo net.vietnamlinuxfamily.zalo_for_linux//master
+          flatpak install --noninteractive --no-deps -y local-build-repo net.vietnamlinuxfamily.zalo_for_linux//stable
 
       - name: Build ZaDark Extension
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
