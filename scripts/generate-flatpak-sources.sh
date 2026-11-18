@@ -29,7 +29,7 @@ OUT=$(CDPATH= cd -- "$OUT" && pwd)
 WORK=$(mktemp -d "$OUT/.flatpak-sources.XXXXXX")
 trap 'rm -rf -- "$WORK"' 0
 trap 'exit 1' HUP INT TERM
-mkdir -p "$WORK/npm" "$WORK/gyp" "$WORK/cargo"
+mkdir -p "$WORK/npm" "$WORK/gyp" "$WORK/cargo" "$WORK/zadark"
 
 # Isolate lockfiles from installed node_modules without modifying the project.
 copy_npm_files() {
@@ -66,10 +66,22 @@ jq -s '
         --output "$WORK/node_modules.json"
 )
 
+# ZaDark is an upstream Git submodule; its Yarn lockfile must be present.
+ZADARK_LOCK="$ROOT/vendor/zadark/yarn.lock"
+[ -f "$ZADARK_LOCK" ] || {
+    echo "Missing $ZADARK_LOCK; initialize upstream submodules before generating sources." >&2
+    exit 1
+}
+flatpak-node-generator yarn "$ZADARK_LOCK" --output "$WORK/zadark/node_modules.json"
+
 for name in node_modules.json cargo-crates.json; do
     jq -e 'type == "array"' "$WORK/$name" >/dev/null
 done
+jq -e 'type == "array"' "$WORK/zadark/node_modules.json" >/dev/null
 for name in node_modules.json cargo-crates.json; do
     mv -- "$WORK/$name" "$OUT/$name"
     printf 'Wrote %s\n' "$OUT/$name"
 done
+mkdir -p "$OUT/zadark"
+mv -- "$WORK/zadark/node_modules.json" "$OUT/zadark/node_modules.json"
+printf 'Wrote %s\n' "$OUT/zadark/node_modules.json"
