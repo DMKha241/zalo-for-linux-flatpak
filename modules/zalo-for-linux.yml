@@ -17,7 +17,7 @@ sources:
   - type: git
     url: https://github.com/ngxccc/zalo-for-linux.git
     branch: feature/flatpak-zadark-extension
-    commit: 890875a2157c1c86654a88b53e19912b95444f83
+    commit: 6753758fbe9713538d9c6785c9ecf6bd3e0a44f5
 
   # Node & cargo cache
   - ../sources/node_modules.json
