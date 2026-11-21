@@ -3,12 +3,12 @@
 <component type="desktop-application">
     <id>net.vietnamlinuxfamily.zalo_for_linux</id>
     <metadata_license>CC0-1.0</metadata_license>
-    <project_license>BSD-3-Clause</project_license>
-    <name>Zalo for Linux</name>
-    <summary>Zalo for Linux</summary>
+    <project_license>BSD-3-Clause AND LicenseRef-proprietary</project_license>
+    <name>Portal for Zalo</name>
+    <summary>Portal for Zalo</summary>
     
-    <developer id="io.github">
-        <name>VN-Linux-Family</name>
+    <developer id="net.vietnamlinuxfamily">
+        <name>Việt Nam Linux Family</name>
     </developer>
     
     <description>
@@ -38,7 +38,7 @@
     <recommends>
         <control>pointing</control>
         <control>keyboard</control>
-        <internet>any</internet>
+        <internet>always</internet>
     </recommends>
     
     <content_rating type="oars-1.1">

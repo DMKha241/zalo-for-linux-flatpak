@@ -12,6 +12,7 @@ install -d /app/lib/zalo
 install -d /app/lib/scripts/patches
 install -d /app/lib/scripts/utils
 install -d /app/lib/prebuilt
+install -d /app/lib/zadark
 
 install -d /app/share/applications
 install -d /app/share/icons/hicolor/scalable/apps

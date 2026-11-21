@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2024-now doandat943 and Việt Nam Linux Family -->
+<component type="addon">
+    <id>net.vietnamlinuxfamily.zalo_for_linux.ZaDark</id>
+    <extends>net.vietnamlinuxfamily.zalo_for_linux</extends>
+    <metadata_license>CC0-1.0</metadata_license>
+    <project_license>MPL-2.0</project_license>
+    <name>Portal for Zalo (ZaDark extension)</name>
+    <summary>ZaDark extension for Zalo</summary>
+    
+    <developer id="com.quaric">
+        <name>Quaric</name>
+    </developer>
+    
+    <description>
+        <p>Native dark mode, privacy enhancements, and custom UI personalization for Zalo.</p>
+        <p>ZaDark helps you experience Zalo more privately and more personalized.</p>
+        <p>Packaged by Việt Nam Linux Family.</p>
+    </description>
+
+    <icon type="stock">net.vietnamlinuxfamily.zalo_for_linux.ZaDark</icon>
+    <url type="homepage">https://zadark.com</url>
+    <url type="bugtracker">https://github.com/VN-Linux-Family/zalo-for-linux/issues</url>
+    <url type="vcs-browser">https://github.com/VN-Linux-Family/zalo-for-linux</url>
+
+    <releases>
+    <release version="26.3" date="2026-11-16">
+      <description>
+        <p>ZaDark extension first release.</p>
+      </description>
+    </release>
+  </releases>
+</component>

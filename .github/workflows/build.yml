@@ -57,6 +57,11 @@ jobs:
           echo "version=$tag_version" >> "$GITHUB_OUTPUT"
           echo "release_version=$full_version" >> "$GITHUB_OUTPUT"
 
+          zadark_version=$(python3 -c 'import xml.etree.ElementTree as ET; print(ET.parse("net.vietnamlinuxfamily.zalo_for_linux.ZaDark.metainfo.xml").find("./releases/release").attrib["version"])')
+          zadark_artifact="ZaDark-${zadark_version}-${ARTIFACT_ARCH}.flatpak"
+          echo "zadark_artifact=$zadark_artifact" >> "$GITHUB_OUTPUT"
+          echo "zadark_version=$zadark_version" >> "$GITHUB_OUTPUT"
+
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
@@ -71,6 +76,35 @@ jobs:
           save-cache: true
           cache-key: flatpak-${{ hashFiles('net.vietnamlinuxfamily.zalo_for_linux.yml', 'net.vietnamlinuxfamily.zalo_for_linux.metainfo.xml', 'modules/*.yml', 'scripts/*.sh', 'sources/*.json') }}
           upload-artifact: false
+
+      - name: Install built Zalo runtime for extension build
+        shell: bash
+        run: |
+          flatpak remote-add --if-not-exists --no-gpg-verify local-build-repo repo
+          flatpak install --noninteractive --no-deps -y local-build-repo net.vietnamlinuxfamily.zalo_for_linux//stable
+
+      - name: Build ZaDark Extension
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: ${{ steps.metadata.outputs.zadark_artifact }}
+          manifest-path: net.vietnamlinuxfamily.zalo_for_linux.ZaDark.yml
+          repository-name: local-build-repo
+          repository-url: https://dmkha241.github.io/zalo-for-linux-flatpak/zalo.flatpakrepo
+          arch: ${{ matrix.arch }}
+          branch: master
+          build-dir: build-dir-zadark
+          keep-build-dirs: false
+          cache: true
+          restore-cache: true
+          save-cache: true
+          cache-key: flatpak-zadark-${{ hashFiles('net.vietnamlinuxfamily.zalo_for_linux.ZaDark.yml', 'net.vietnamlinuxfamily.zalo_for_linux.ZaDark.metainfo.xml', 'modules/zadark-ext.yml', 'scripts/*zadark*.sh', 'sources/zadark/node_modules.json') }}
+          upload-artifact: false
+
+      - name: Clean up temporary build remote
+        if: always()
+        shell: bash
+        run: |
+          flatpak remote-delete --force local-build-repo || true
 
       - name: Package local build cache
         shell: bash
@@ -110,6 +144,14 @@ jobs:
           compression-level: 0
           retention-days: 30
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.metadata.outputs.zadark_artifact }}
+          path: ${{ steps.metadata.outputs.zadark_artifact }}
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
+
   release:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: build
@@ -127,14 +169,14 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          pattern: Zalo-*.flatpak
+          pattern: '*.flatpak'
           merge-multiple: true
           path: dist
 
       - name: Publish release
         run: |
-          files=(dist/Zalo-*.flatpak)
-          [[ ${#files[@]} -eq 2 ]]
+          files=(dist/*.flatpak)
+          [[ ${#files[@]} -ge 2 ]]
           for file in "${files[@]}"; do test -s "$file"; done
 
           if ! gh release view "$ZALO_VERSION" >/dev/null 2>&1; then
@@ -146,7 +188,7 @@ jobs:
           gh api "repos/$GH_REPO/releases/tags/$ZALO_VERSION" > release.json
           declare -A keep=()
           while IFS= read -r name; do
-            [[ "$name" == Zalo-*.flatpak && "$name" != */* ]] || continue
+            [[ ("$name" == Zalo-*.flatpak || "$name" == ZaDark-*.flatpak) && "$name" != */* ]] || continue
             if [[ -f "dist/$name" ]]; then
               local_sha=$(sha256sum "dist/$name" | cut -d ' ' -f1)
               digest=$(jq -r --arg name "$name" '.assets[] | select(.name == $name) | .digest // ""' release.json)
@@ -258,7 +300,8 @@ jobs:
                         <h2>Install</h2>
                         <p>Add this repository, then install the application:</p>
                         <pre><code>flatpak remote-add --user --no-gpg-verify zalo https://dmkha241.github.io/zalo-for-linux-flatpak
-          flatpak install --user zalo net.vietnamlinuxfamily.zalo_for_linux</code></pre>
+          flatpak install --user zalo net.vietnamlinuxfamily.zalo_for_linux
+          flatpak install --user zalo net.vietnamlinuxfamily.zalo_for_linux.ZaDark</code></pre>
                         <p>Supported architecture on this repository: x86_64.</p>
                         <p><a href="https://github.com/DMKha241/zalo-for-linux-flatpak">Source and issue tracker</a></p>
                       </main>
@@ -307,4 +350,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-    
