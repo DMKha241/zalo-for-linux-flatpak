@@ -1,4 +1,5 @@
 id: net.vietnamlinuxfamily.zalo_for_linux
+branch: stable
 
 runtime: org.freedesktop.Platform
 runtime-version: '26.08'
@@ -10,6 +11,14 @@ sdk: org.freedesktop.Sdk
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.node22
   - org.freedesktop.Sdk.Extension.rust-stable
+  
+add-extensions:
+  net.vietnamlinuxfamily.zalo_for_linux.ZaDark:
+    directory: lib/zadark
+    bundle: false
+    autodelete: true
+    no-autodownload: true
+    version: stable
 
 command: zalo
 
@@ -21,10 +30,17 @@ finish-args:
     - --socket=pulseaudio
     - --filesystem=xdg-download
     - --filesystem=xdg-pictures
+    - --filesystem=xdg-config/kdeglobals:ro
     - --talk-name=org.freedesktop.Notifications
     - --talk-name=org.kde.StatusNotifierWatcher
     - --talk-name=org.kde.Spectacle
     - --own-name=org.kde.StatusNotifierItem-2-1
+    # Electron sets the taskbar badge through libunity, which only emits
+    # LauncherEntry.Update after it has seen this name on the session bus. The
+    # sandbox hides the name otherwise, so app.setBadgeCount silently does nothing.
+    - --talk-name=com.canonical.Unity 
+    - --env=XDG_CURRENT_DESKTOP=Unity
+    - --talk-name=org.freedesktop.Flatpak # For enabling autostart on Zalo 
     - --talk-name=com.canonical.AppMenu.Registrar
     - --talk-name=com.canonical.indicator.application
     - --talk-name=org.ayatana.indicator.application
@@ -34,4 +50,5 @@ modules:
   - modules/7z.yml
   - modules/onnxruntime.yml
   - modules/zalo-for-linux.yml
+
 

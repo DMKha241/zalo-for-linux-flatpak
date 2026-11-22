@@ -7,7 +7,12 @@ printf '$'
 printf ' %q' "$@"
 printf '\n'
 
-if "$@" >"$log" 2>&1; then
+export CLICOLOR_FORCE=1
+export FORCE_COLOR=1
+export CMAKE_COLOR_DIAGNOSTICS=ON
+export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+
+if "$@" 2>&1 | tee "$log"; then
     exit 0
 else
     status=$?
