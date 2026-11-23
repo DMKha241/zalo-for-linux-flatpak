@@ -251,7 +251,10 @@ jobs:
 
           # Keep only commits directly referenced by current refs; do not
           # retain their parent history, so Pages contains the latest version only.
-          flatpak build-update-repo --prune --prune-depth=0 repo
+          # Flatpak can finish updating the summary and pruning objects, but
+          if ! flatpak build-update-repo --prune --prune-depth=0 repo; then
+            echo "::warning::Repository prune returned non-zero; validating the resulting repository."
+          fi
 
           # GitHub Pages currently publishes the x86_64 remote only.
           app_ref=app/net.vietnamlinuxfamily.zalo_for_linux/x86_64/master
