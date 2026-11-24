@@ -16,7 +16,7 @@ build-options:
 sources:
   - type: git
     url: https://github.com/VN-Linux-Family/zalo-for-linux.git
-    commit: 00d2cd874c4f96bba4e005296d6ed07b91a00c2e
+    commit: d9e8ec77ceaf8f80c9733efb2f71801d9a9336af
 
   # Node & cargo cache
   - ../sources/node_modules.json

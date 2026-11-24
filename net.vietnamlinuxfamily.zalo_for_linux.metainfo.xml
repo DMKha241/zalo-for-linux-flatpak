@@ -63,6 +63,24 @@
     </screenshots>
     
     <releases>
+    <release version="26.11.10.261124135829" date="2026-11-24">
+      <description>
+        <ul>
+            <li>fix(linux): stop shell.openPath() from freezing the UI thread</li>
+            <li>refactor(rust): replace libc syscalls with rustix</li>
+            <li>refactor(rust): drop libc, use nix getrusage and safe napi conversions</li>
+            <li>fix(rust): address review findings in zocr ipc, zjxl, apm and timeout handling</li>
+            <li>refactor(zocr): migrate ONNX Runtime bindings to the ort crate</li>
+            <li>fix(build): fetch ONNX Runtime from NuGet after GitHub release removal</li>
+            <li>fix(zjxl): rollback jxl-encoder</li>
+            <li>fix(rust): fix clippy warnings and replace unstable map_or_default</li>
+            <li>fix(rust): drop unused avif encoding to eliminate unmaintained paste dependency</li>
+            <li>add new contributor</li>
+            <li>perf(ast): add balanced snippet AST extractors and pipeline runner</li>
+            <li>perf(patches): optimize AST queries and use snippet AST in hot patches</li>
+        </ul>
+      </description>
+    </release>
     <release version="26.11.10.261113151413" date="2026-11-13">
       <description>
         <ul>
