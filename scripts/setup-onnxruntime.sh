@@ -20,7 +20,7 @@ test "$(cat "$onnx_source/VERSION_NUMBER")" = 1.30.0
     -Donnxruntime_CMAKE_DEPS_MIRROR_DIR="$PWD/flatpak-onnx-deps"
 "$logger" onnxruntime-build.log cmake --build "$onnx_build" --target onnxruntime --parallel "${FLATPAK_BUILDER_N_JOBS:-2}"
 
-onnx_library=libonnxruntime.so.1.30.0
+onnx_library=libonnxruntime.so
 
 test -f "$onnx_build/$onnx_library"
 test ! -L "$onnx_build/$onnx_library"
