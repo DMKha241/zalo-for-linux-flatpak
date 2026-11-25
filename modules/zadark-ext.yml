@@ -1,6 +1,8 @@
 name: zadark-ext
 buildsystem: simple
 builddir: true
+license-files:
+  - vendor/zadark/LICENSE
 
 build-options:
   append-path: /usr/lib/sdk/node22/bin
