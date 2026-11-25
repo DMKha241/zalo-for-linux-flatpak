@@ -1,6 +1,9 @@
 id: net.vietnamlinuxfamily.zalo_for_linux
 branch: stable
 
+tags:
+  - non-free
+
 runtime: org.freedesktop.Platform
 runtime-version: '26.08'
 
