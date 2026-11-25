@@ -23,6 +23,5 @@ test "$(cat "$onnx_source/VERSION_NUMBER")" = 1.30.0
 onnx_library=libonnxruntime.so
 
 test -f "$onnx_build/$onnx_library"
-test ! -L "$onnx_build/$onnx_library"
-install -p -m0755 "$onnx_build/$onnx_library" "/app/lib/prebuilt/$onnx_library"
+install -p -m0755 "$(readlink -f "$onnx_build/$onnx_library")" "/app/lib/prebuilt/$onnx_library"
 python3 verify-onnxruntime.py "/app/lib/prebuilt/$onnx_library" "1.30.0"
