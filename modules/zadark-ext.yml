@@ -24,7 +24,7 @@ sources:
     dest: flatpak
     
   - type: file
-    path: ../net.vietnamlinuxfamily.zalo_for_linux.svg
+    path: ../net.vietnamlinuxfamily.zalo_for_linux.ZaDark.svg
     dest: flatpak
 
   - type: file

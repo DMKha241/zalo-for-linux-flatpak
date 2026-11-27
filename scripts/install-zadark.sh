@@ -5,7 +5,7 @@ DEST_DIR="${FLATPAK_DEST:-/app/lib/zadark}"
 ASSETS_DIR="vendor/zadark/build/pc/assets"
 METADATA_DIR="$DEST_DIR/share/metainfo"
 ICON_DIR="$DEST_DIR/share/icons/hicolor/scalable/apps"
-ICON_PATH="flatpak/net.vietnamlinuxfamily.zalo_for_linux.svg"
+ICON_PATH="flatpak/net.vietnamlinuxfamily.zalo_for_linux.ZaDark.svg"
 
 if [ ! -d "$ASSETS_DIR" ]; then
     echo "Error: Built assets directory $ASSETS_DIR not found!" >&2
