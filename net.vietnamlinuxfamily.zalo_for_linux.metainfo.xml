@@ -63,6 +63,14 @@
     </screenshots>
     
     <releases>
+    <release version="26.11.10.261128071001" date="2026-11-28">
+      <description>
+        <p>Update Windows source to 26.11.12</p>
+        <ul>
+            <li>refactor(rust): migrate workspace to napi 3 and RustCrypto 0.11</li>
+        </ul>
+      </description>
+    </release>
     <release version="26.11.10.261124135829" date="2026-11-24">
       <description>
         <ul>

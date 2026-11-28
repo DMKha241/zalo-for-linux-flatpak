@@ -86,6 +86,8 @@ jobs:
         env:
           VERSION_CHANGED: ${{ steps.update.outputs.version_changed }}
           COMMIT_CHANGED: ${{ steps.update.outputs.commit_changed }}
+          WINDOWS_VERSION_CHANGED: ${{ steps.update.outputs.windows_version_changed }}
+          UPSTREAM_WINDOWS_VERSION: ${{ steps.update.outputs.upstream_windows_version }}
           UPSTREAM_VERSION: ${{ steps.update.outputs.upstream_version }}
           CURRENT_COMMIT: ${{ steps.update.outputs.current_commit }}
           UPSTREAM_COMMIT: ${{ steps.update.outputs.upstream_commit }}
@@ -96,6 +98,11 @@ jobs:
           if [ "$VERSION_CHANGED" = "true" ]; then
             BODY="${BODY}
           Update Zalo to $UPSTREAM_VERSION"
+          fi
+
+          if [ "$WINDOWS_VERSION_CHANGED" = "true" ]; then
+            BODY="${BODY}
+          Update Windows installer to $UPSTREAM_WINDOWS_VERSION"
           fi
 
           if [ "$COMMIT_CHANGED" = "true" ]; then
